@@ -1,0 +1,107 @@
+{
+  "beaconsForSiteID": {
+    "ef615500-7ba2-2e88-1f46-d12e5fb1512d": [
+      {
+        "id": "c0563500-dca2-69a2-9541-126eb7d8f189",
+        "teamID": "7e680e00-7ba2-8ab2-3943-f06fccd94180",
+        "proximity": "BC_PROXIMITY_FAR",
+        "bluetoothAddress": "000780682600",
+        "siteID": "ef615500-7ba2-2e88-1f46-d12e5fb1512d",
+        "version": 20,
+        "proximityUUID": "61687109-905F-4436-91F8-E602F514C96D",
+        "siteName": "BlueCats - Level 13, 56 Berry",
+        "accuracy": 6.1271604369518,
+        "rssi": -96,
+        "categories": [
+          {
+            "id": "cf0c5100-faa2-e1a0-ce4b-a5372eb1ddd8",
+            "name": "Soft Drinks"
+          },
+          {
+            "id": "2a096301-81a2-7db7-2847-fd74630f085b",
+            "name": "Beer!"
+          },
+          {
+            "id": "9bfef100-04a3-8599-4f4c-ddba959a578a",
+            "name": "Bedding Offer"
+          },
+          {
+            "id": "d3f0f100-04a3-e892-624a-4f9533bfea9e",
+            "name": "Electronics Offer"
+          },
+          {
+            "id": "ebe2f100-04a3-6296-2e45-deffa50c23a9",
+            "name": "Appliances Offer"
+          },
+          {
+            "id": "08d7f100-04a3-b784-9f4d-568d30d4da56",
+            "name": "Furniture Offer"
+          },
+          {
+            "id": "4a7ef000-10a3-b7b1-964b-c8accb843587",
+            "name": "Price"
+          },
+          {
+            "id": "8d89f000-10a3-5e82-c942-f94af68b935c",
+            "name": "Competition"
+          },
+          {
+            "id": "68e44900-22a3-2787-264a-fb3462954a95",
+            "name": "Aldi"
+          },
+          {
+            "id": "d4fbef00-23a3-e2a5-474b-3c13071d7591",
+            "name": "John Entwistle"
+          },
+          {
+            "id": "e2d3ef00-23a3-0c9e-f546-d9faace731dc",
+            "name": "Sydney"
+          }
+        ],
+        "name": "BlueCats iBeacon",
+        "minor": 1010,
+        "measuredPowerAt1Meter": -94,
+        "major": 3
+      }
+    ],
+    "8e4d1400-9aa2-668b-c44f-d14b1a0f3964": [
+      {
+        "id": "0ef43100-dca2-d0a6-2041-e35e0deef976",
+        "teamID": "7e680e00-7ba2-8ab2-3943-f06fccd94180",
+        "proximity": "BC_PROXIMITY_NEAR",
+        "bluetoothAddress": "0007806824C5",
+        "siteID": "8e4d1400-9aa2-668b-c44f-d14b1a0f3964",
+        "version": 19,
+        "proximityUUID": "61687109-905F-4436-91F8-E602F514C96D",
+        "siteName": "Rodrigo's Cave",
+        "accuracy": 0.37260415444465,
+        "rssi": -73,
+        "categories": [
+          {
+            "id": "8db32e00-01a3-f0ac-db4d-dbc9f127edc6",
+            "name": "Mother Energy"
+          }
+        ],
+        "name": "BlueCats iBeacon",
+        "minor": 1001,
+        "measuredPowerAt1Meter": -82,
+        "major": 3
+      }
+    ]
+  },
+  "sites": [
+    {
+      "name": "BlueCats - Level 13, 56 Berry",
+      "id": "ef615500-7ba2-2e88-1f46-d12e5fb1512d",
+      "teamID": "7e680e00-7ba2-8ab2-3943-f06fccd94180",
+      "beaconCount": 3,
+      "greeting": "BlueCats Sydney HQ!"
+    },
+    {
+      "name": "Rodrigo's Cave",
+      "id": "8e4d1400-9aa2-668b-c44f-d14b1a0f3964",
+      "teamID": "7e680e00-7ba2-8ab2-3943-f06fccd94180",
+      "beaconCount": 2
+    }
+  ]
+}
