@@ -28,6 +28,12 @@
 
 		<header-file src="src/ios/BCMicroLocation+JSON.h" />
 		<source-file src="src/ios/BCMicroLocation+JSON.m" />
+		<header-file src="src/ios/BCFirstBeaconChangedEventFilter.h" />
+		<source-file src="src/ios/BCFirstBeaconChangedEventFilter.m" />
+		<header-file src="src/ios/BCNewBeaconDiscoveredEventFilter.h" />
+		<source-file src="src/ios/BCNewBeaconDiscoveredEventFilter.m" />
+		<header-file src="src/ios/BCValidationFilter.h" />
+		<source-file src="src/ios/BCValidationFilter.m" />
 
 		<framework src="Foundation.framework" />
 		<framework src="CoreData.framework" />
@@ -161,6 +167,7 @@
 		<header-file src="src/ios/BlueCatsSDK/BCTriggeredEvent.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCTrigger.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCEventFilter.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCEventFilterContext.h" />
 
 		<source-file src="src/ios/BlueCatsSDK/libBlueCatsSDK.a" framework="true" />
 

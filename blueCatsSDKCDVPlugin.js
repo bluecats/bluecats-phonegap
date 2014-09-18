@@ -141,3 +141,15 @@ com.blueCats.BlueCatsSDKCDVPlugin.cancelAllLocalNotifications(
 exports.cancelAllLocalNotifications = function(win, fail) {
 	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'cancelAllLocalNotifications', []);
 };
+
+exports.monitorClosestBeaconChange = function(config, win, fail) {
+	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'monitorClosestBeaconChange', [config]);
+};
+
+exports.monitorEnterBeacon = function(config, win, fail) {
+	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'monitorEnterBeacon', [config]);
+};
+
+exports.monitorExitBeacon = function(config, win, fail) {
+	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'monitorExitBeacon', [config]);
+};
