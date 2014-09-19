@@ -11,4 +11,6 @@
 
 @interface BCNewBeaconDiscoveredEventFilter : NSObject<BCEventFilter>
 
+@property (nonatomic, assign) NSTimeInterval minTimeBeforeExit;
+
 @end

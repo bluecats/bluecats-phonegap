@@ -81,19 +81,18 @@
 
 -(void)monitorClosestBeaconChange:(CDVInvokedUrlCommand*)command
 {
+    NSDictionary* config = [command.arguments firstObject];
     NSMutableArray* filters = [[NSMutableArray alloc] init];
-    if (command.arguments.count > 0) {
-        [filters addObjectsFromArray:[self filtersFromConfig:command.arguments[0]]];
-    }
+    [filters addObjectsFromArray:[self filtersFromConfig:config]];
+    
     [filters addObject:[BCEventFilter filterApplySmoothedAccuracyOverTimeInterval:5.0f]];
     [filters addObject:[BCEventFilter filterByClosestBeacon]];
-    [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:5.0f]];
+    [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromConfig:config]]];
     [filters addObject:[[BCFirstBeaconChangedEventFilter alloc] init]];
     [filters addObject:[[BCValidationFilter alloc] init]];
     
     BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:command.callbackId andFilters:filters];
-    
-    trigger.repeatCount = NSIntegerMax;
+    trigger.repeatCount = [self repeatCountFromConfig:config];
     
     BCEventManager* eventManager = [BCEventManager sharedManager];
     [eventManager monitorEventWithTrigger:trigger];
@@ -101,17 +100,18 @@
 
 -(void)monitorEnterBeacon:(CDVInvokedUrlCommand*)command
 {
+    NSDictionary* config = [command.arguments firstObject];
     NSMutableArray* filters = [[NSMutableArray alloc] init];
-    if (command.arguments.count > 0) {
-        [filters addObjectsFromArray:[self filtersFromConfig:command.arguments[0]]];
-    }
+    [filters addObjectsFromArray:[self filtersFromConfig:config]];
     
-    [filters addObject:[[BCNewBeaconDiscoveredEventFilter alloc] init]];
+    [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromConfig:config]]];
+    BCNewBeaconDiscoveredEventFilter* newBeaconFilter = [[BCNewBeaconDiscoveredEventFilter alloc] init];
+    newBeaconFilter.minTimeBeforeExit = [self secondsBeforeExitBeaconFromConfig:config];
+    [filters addObject:newBeaconFilter];
     [filters addObject:[[BCValidationFilter alloc] init]];
     
     BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:command.callbackId andFilters:filters];
-    
-    trigger.repeatCount = NSIntegerMax;
+    trigger.repeatCount = [self repeatCountFromConfig:config];
     
     BCEventManager* eventManager = [BCEventManager sharedManager];
     [eventManager monitorEventWithTrigger:trigger];
@@ -119,18 +119,16 @@
 
 -(void)monitorExitBeacon:(CDVInvokedUrlCommand*)command
 {
+    NSDictionary* config = [command.arguments firstObject];
     NSMutableArray* filters = [[NSMutableArray alloc] init];
-    if (command.arguments.count > 0) {
-        [filters addObjectsFromArray:[self filtersFromConfig:command.arguments[0]]];
-    }
+    [filters addObjectsFromArray:[self filtersFromConfig:config]];
     
-    [filters addObject:[BCEventFilter filterByClosestBeacon]];
-    [filters addObject:[BCEventFilter filterByExitedBeaconAfterTimeInterval:5.0f]];
+    [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromConfig:config]]];
+    [filters addObject:[BCEventFilter filterByExitedBeaconAfterTimeInterval:[self secondsBeforeExitBeaconFromConfig:config]]];
     [filters addObject:[[BCValidationFilter alloc] init]];
     
     BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:command.callbackId andFilters:filters];
-    
-    trigger.repeatCount = NSIntegerMax;
+    trigger.repeatCount = [self repeatCountFromConfig:config];
     
     BCEventManager* eventManager = [BCEventManager sharedManager];
     [eventManager monitorEventWithTrigger:trigger];
@@ -212,6 +210,33 @@
          forCallback: callbackId
          keepCallback: YES];
     }
+}
+
+- (NSInteger)repeatCountFromConfig:(NSDictionary*)config
+{
+    NSNumber* repeatCount = [config objectForKey:@"repeatCount"];
+    if (repeatCount && [repeatCount integerValue] >= 0) {
+        return [repeatCount integerValue];
+    }
+    return NSIntegerMax;
+}
+
+- (NSTimeInterval)secondsBeforeExitBeaconFromConfig:(NSDictionary*)config
+{
+    NSNumber* secondsBeforeExitBeacon = [config objectForKey:@"secondsBeforeExitBeacon"];
+    if (secondsBeforeExitBeacon && [secondsBeforeExitBeacon floatValue] > 0.0f) {
+        return [secondsBeforeExitBeacon floatValue];
+    }
+    return 10.0f;
+}
+
+- (NSTimeInterval)minimumTriggerIntervalInSecondsFromConfig:(NSDictionary*)config
+{
+    NSNumber* minimumTriggerIntervalInSeconds = [config objectForKey:@"minimumTriggerIntervalInSeconds"];
+    if (minimumTriggerIntervalInSeconds && [minimumTriggerIntervalInSeconds floatValue] >= 0.0f) {
+        return [minimumTriggerIntervalInSeconds floatValue];
+    }
+    return 0.0f;
 }
 
 - (NSArray*)filtersFromConfig:(NSDictionary*)config

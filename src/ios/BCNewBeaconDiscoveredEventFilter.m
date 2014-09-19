@@ -11,25 +11,50 @@
 
 @interface BCNewBeaconDiscoveredEventFilter()
 
-@property NSMutableSet* discoveredBeaconIDs;
+@property (nonatomic, strong) NSMutableDictionary* beaconIDLastMatched;
 
 @end
 
 @implementation BCNewBeaconDiscoveredEventFilter
 
+-(NSMutableDictionary *)beaconIDLastMatched
+{
+    if (!_beaconIDLastMatched) {
+        _beaconIDLastMatched = [[NSMutableDictionary alloc] init];
+    }
+    return _beaconIDLastMatched;
+}
+
+-(NSTimeInterval)minTimeBeforeExit
+{
+    if (_minTimeBeforeExit < 1) {
+        _minTimeBeforeExit = 5.0f;
+    }
+    return _minTimeBeforeExit;
+}
+
 -(NSArray *)filterBeaconsForEvent:(BCEventFilterContext *)eventContext
 {
+    if (!self.beaconIDLastMatched) {
+        self.beaconIDLastMatched = [[NSMutableDictionary alloc] init];
+    }
+    NSMutableArray* discoveredBeacons = [[NSMutableArray alloc] init];
+    
+    NSDate* matchDate = [NSDate date];
     for (BCBeacon* beacon in eventContext.beaconsToFilter) {
-        if (!self.discoveredBeaconIDs) {
-            self.discoveredBeaconIDs = [[NSMutableSet alloc] init];
+        if (beacon.accuracy == -1) {
+            continue;
         }
         
-        if (![self.discoveredBeaconIDs containsObject:beacon.beaconID]) {
-            [self.discoveredBeaconIDs addObject:beacon.beaconID];
-            return @[beacon];
+        NSDate* beaconLastMatched = [self.beaconIDLastMatched objectForKey:beacon.beaconID];
+        if (!beaconLastMatched || [matchDate timeIntervalSinceDate:beaconLastMatched] > self.minTimeBeforeExit) {
+            [discoveredBeacons addObject:beacon];
         }
+        
+        [self.beaconIDLastMatched setObject:matchDate forKey:beacon.beaconID];
     }
-    return nil;
+    
+    return discoveredBeacons;
 }
 
 @end
