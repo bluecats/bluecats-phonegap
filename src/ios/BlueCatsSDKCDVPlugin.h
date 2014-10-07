@@ -17,8 +17,9 @@
 - (void) startUpdatingMicroLocation: (CDVInvokedUrlCommand*)command;
 - (void) stopUpdatingMicroLocation: (CDVInvokedUrlCommand*)command;
 
--(void)monitorClosestBeaconChange:(CDVInvokedUrlCommand*)command;
--(void)monitorEnterBeacon:(CDVInvokedUrlCommand*)command;
+- (void) monitorClosestBeaconChange:(CDVInvokedUrlCommand*)command;
+- (void) monitorEnterBeacon:(CDVInvokedUrlCommand*)command;
+- (void) monitorExitBeacon:(CDVInvokedUrlCommand*)command;
 
 - (void) registerLocalNotificationReceivedCallback:(CDVInvokedUrlCommand*)command;
 - (void) scheduleLocalNotification:(CDVInvokedUrlCommand *)command;

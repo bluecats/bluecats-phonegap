@@ -16,9 +16,6 @@
 #import "BCLocalNotificationManager.h"
 #import "BCLocalNotification.h"
 #import "BCEventManager.h"
-#import "BCFirstBeaconChangedEventFilter.h"
-#import "BCNewBeaconDiscoveredEventFilter.h"
-#import "BCValidationFilter.h"
 
 @interface BlueCatsSDKCDVPlugin()<BCMicroLocationManagerDelegate, BCEventManagerDelegate>
 
@@ -86,10 +83,8 @@
     [filters addObjectsFromArray:[self filtersFromConfig:config]];
     
     [filters addObject:[BCEventFilter filterApplySmoothedAccuracyOverTimeInterval:5.0f]];
-    [filters addObject:[BCEventFilter filterByClosestBeacon]];
     [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromConfig:config]]];
-    [filters addObject:[[BCFirstBeaconChangedEventFilter alloc] init]];
-    [filters addObject:[[BCValidationFilter alloc] init]];
+    [filters addObject:[BCEventFilter filterByClosestBeaconChanged]];
     
     BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:command.callbackId andFilters:filters];
     trigger.repeatCount = [self repeatCountFromConfig:config];
@@ -105,10 +100,7 @@
     [filters addObjectsFromArray:[self filtersFromConfig:config]];
     
     [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromConfig:config]]];
-    BCNewBeaconDiscoveredEventFilter* newBeaconFilter = [[BCNewBeaconDiscoveredEventFilter alloc] init];
-    newBeaconFilter.minTimeBeforeExit = [self secondsBeforeExitBeaconFromConfig:config];
-    [filters addObject:newBeaconFilter];
-    [filters addObject:[[BCValidationFilter alloc] init]];
+    [filters addObject:[BCEventFilter filterByEnteredBeaconResetAfterTimeIntervalUnmatched:[self secondsBeforeExitBeaconFromConfig:config]]];
     
     BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:command.callbackId andFilters:filters];
     trigger.repeatCount = [self repeatCountFromConfig:config];
@@ -124,8 +116,7 @@
     [filters addObjectsFromArray:[self filtersFromConfig:config]];
     
     [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromConfig:config]]];
-    [filters addObject:[BCEventFilter filterByExitedBeaconAfterTimeInterval:[self secondsBeforeExitBeaconFromConfig:config]]];
-    [filters addObject:[[BCValidationFilter alloc] init]];
+    [filters addObject:[BCEventFilter filterByExitedBeaconAfterTimeIntervalUnmatched:[self secondsBeforeExitBeaconFromConfig:config]]];
     
     BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:command.callbackId andFilters:filters];
     trigger.repeatCount = [self repeatCountFromConfig:config];
@@ -282,6 +273,18 @@
         } else if ([maximumProximity isEqualToString:@"BC_PROXIMITY_UNKNOWN"]) {
             [filters addObject:[BCEventFilter filterByProximities:@[[NSNumber numberWithInt:BCProximityImmediate],[NSNumber numberWithInt:BCProximityNear],[NSNumber numberWithInt:BCProximityFar],[NSNumber numberWithInt:BCProximityUnknown]]]];
         }
+    }
+    
+    NSNumber* minimumAccuracy = [filterSettings objectForKey:@"minimumAccuracy"];
+    NSNumber* maximumAccuracy = [filterSettings objectForKey:@"maximumAccuracy"];
+    if (minimumAccuracy || maximumAccuracy) {
+        if ([minimumAccuracy doubleValue] <= 0.0) {
+            minimumAccuracy = nil;
+        }
+        if ([maximumAccuracy doubleValue] <= 0.0) {
+            maximumAccuracy = [NSNumber numberWithDouble:DBL_MAX];
+        }
+        [filters addObject:[BCEventFilter filterByAccuracyRangeFrom:[minimumAccuracy doubleValue] to:[maximumAccuracy doubleValue]]];
     }
     
     return filters;

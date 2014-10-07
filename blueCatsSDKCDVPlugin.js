@@ -142,14 +142,107 @@ exports.cancelAllLocalNotifications = function(win, fail) {
 	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'cancelAllLocalNotifications', []);
 };
 
+/** Register a callback to be notified when the closest beacon changes
+*
+* @param {config} config
+* @param {successCallback} win
+* @param {failCallback} fail
+*
+* @example
+com.blueCats.BlueCatsSDKCDVPlugin.monitorClosestBeaconChange(
+	{
+        secondsBeforeExitBeacon:10.0,
+        minimumTriggerIntervalInSeconds:5.0,
+        filter:
+        {
+            sitesNamed:['My Site'],
+            categoriesNamed:['Entrance'],
+            minimumProximity:'BC_PROXIMITY_IMMEDIATE',
+            maximumProximity:'BC_PROXIMITY_NEAR',
+            minimumAccuracy:0.0,
+            maximumAccuarcy:2.0
+        }
+    },
+	function(eventData)
+	{
+		console.log('Closest beacon changed');
+	},
+	function(error)
+	{
+		console.log('Closest beacon failed' + error);
+	}
+);
+*/
 exports.monitorClosestBeaconChange = function(config, win, fail) {
 	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'monitorClosestBeaconChange', [config]);
 };
 
+/** Register a callback to be notified when entering range of beacon
+*
+* @param {config} config
+* @param {successCallback} win
+* @param {failCallback} fail
+*
+* @example
+com.blueCats.BlueCatsSDKCDVPlugin.monitorEnterBeacon(
+	{
+        secondsBeforeExitBeacon:10.0,
+        minimumTriggerIntervalInSeconds:5.0,
+        filter:
+        {
+            sitesNamed:['My Site'],
+            categoriesNamed:['Entrance'],
+            minimumProximity:'BC_PROXIMITY_IMMEDIATE',
+            maximumProximity:'BC_PROXIMITY_NEAR',
+            minimumAccuracy:0.0,
+            maximumAccuarcy:2.0
+        }
+    },
+	function(eventData)
+	{
+		console.log('Entered beacon');
+	},
+	function(error)
+	{
+		console.log('Enter beacon failed' + error);
+	}
+);
+*/
 exports.monitorEnterBeacon = function(config, win, fail) {
 	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'monitorEnterBeacon', [config]);
 };
 
+/** Register a callback to be notified when exiting range of a beacon
+*
+* @param {config} config
+* @param {successCallback} win
+* @param {failCallback} fail
+*
+* @example
+com.blueCats.BlueCatsSDKCDVPlugin.monitorExitBeacon(
+	{
+        secondsBeforeExitBeacon:10.0,
+        minimumTriggerIntervalInSeconds:5.0,
+        filter:
+        {
+            sitesNamed:['My Site'],
+            categoriesNamed:['Entrance'],
+            minimumProximity:'BC_PROXIMITY_IMMEDIATE',
+            maximumProximity:'BC_PROXIMITY_NEAR',
+            minimumAccuracy:0.0,
+            maximumAccuarcy:2.0
+        }
+    },
+	function(eventData)
+	{
+		console.log('Exited beacon');
+	},
+	function(error)
+	{
+		console.log('Exit beacon failed' + error);
+	}
+);
+*/
 exports.monitorExitBeacon = function(config, win, fail) {
 	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'monitorExitBeacon', [config]);
 };

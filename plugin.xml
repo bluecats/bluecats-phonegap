@@ -28,12 +28,6 @@
 
 		<header-file src="src/ios/BCMicroLocation+JSON.h" />
 		<source-file src="src/ios/BCMicroLocation+JSON.m" />
-		<header-file src="src/ios/BCFirstBeaconChangedEventFilter.h" />
-		<source-file src="src/ios/BCFirstBeaconChangedEventFilter.m" />
-		<header-file src="src/ios/BCNewBeaconDiscoveredEventFilter.h" />
-		<source-file src="src/ios/BCNewBeaconDiscoveredEventFilter.m" />
-		<header-file src="src/ios/BCValidationFilter.h" />
-		<source-file src="src/ios/BCValidationFilter.m" />
 
 		<framework src="Foundation.framework" />
 		<framework src="CoreData.framework" />
@@ -150,6 +144,7 @@
 		<source-file src="src/ios/RestKit/libRestKit.a" framework="true" />
 
 		<header-file src="src/ios/BlueCatsSDK/BlueCatsSDK.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCApp.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCMicroLocationManager.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCMicroLocation.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCAddress.h" />
@@ -157,8 +152,11 @@
 		<header-file src="src/ios/BlueCatsSDK/BCBeaconDataSource.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCCategory.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCCategoryDataSource.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCCustomValue.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCLocalNotification.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCLocalNotificationManager.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCMap.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCMapPoint.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCPoint.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCResource.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCSite.h" />

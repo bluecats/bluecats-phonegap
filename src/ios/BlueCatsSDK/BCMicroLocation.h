@@ -34,4 +34,6 @@
 
 - (BCMapPoint *)mapPointForSite:(BCSite *)site;
 
+- (NSArray *)allCategories;
+
 @end
