@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
-	id="com.blueCats.BlueCatsSDKCDVPlugin"
-	version="0.0.2">
+	id="com.bluecats.beacons"
+	version="0.0.3">
 
 	<!-- This plugin requires Cordova version 3.1.0 or newer. -->
 	<engines>
@@ -13,7 +13,7 @@
 	<dependency id="org.apache.cordova.android-support-library" url="https://github.com/savs/android-support-library" /> 
 
 	<js-module src="blueCatsSDKCDVPlugin.js" name="BlueCatsSDKCDVPlugin">
-		<clobbers target="com.blueCats.BlueCatsSDKCDVPlugin" />
+		<clobbers target="com.bluecats.beacons" />
 	</js-module>
 
 	<platform name="ios">

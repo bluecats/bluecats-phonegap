@@ -1,5 +1,11 @@
 package com.blueCats.BlueCatsSDKCDVPlugin;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -7,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.WeakHashMap;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -22,14 +29,19 @@ import android.util.Log;
 
 import com.bluecats.sdk.BCBeacon;
 import com.bluecats.sdk.BCCategory;
+import com.bluecats.sdk.BCEventFilter;
+import com.bluecats.sdk.BCEventManager;
+import com.bluecats.sdk.BCEventManagerCallback;
 import com.bluecats.sdk.BCLocalNotification;
 import com.bluecats.sdk.BCLocalNotificationManager;
 import com.bluecats.sdk.BCMicroLocation;
 import com.bluecats.sdk.BCMicroLocationManager;
 import com.bluecats.sdk.BCSite;
+import com.bluecats.sdk.BCTrigger;
+import com.bluecats.sdk.BCTriggeredEvent;
 import com.bluecats.sdk.BlueCatsSDK;
-import com.bluecats.sdk.IBlueCatsSDKCallback;
 import com.bluecats.sdk.BCBeacon.BCProximity;
+import com.bluecats.sdk.IBCEventFilter;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -39,16 +51,20 @@ import com.google.gson.JsonParser;
 public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 	private static String TAG = "BlueCatsSDKCDVPlugin";
 
+	private static final boolean DBG = true;
+
 	public static final String ACTION_START_PURRING_WITH_APP_TOKEN = "startPurringWithAppToken";
-	public static final String ACTION_START_UPDATING_MICRO_LOCATION = "startUpdatingMicroLocation";
-	public static final String ACTION_STOP_UPDATING_MICRO_LOCATION = "stopUpdatingMicroLocation";
+	public static final String ACTION_MONITOR_MICRO_LOCATION = "monitorMicroLocation";
+	public static final String ACTION_MONITOR_CLOSEST_BEACON_CHANGE = "monitorClosestBeaconChange";
+	public static final String ACTION_MONITOR_ENTER_BEACON = "monitorEnterBeacon";
+	public static final String ACTION_MONITOR_EXIT_BEACON = "monitorExitBeacon";
+	public static final String ACTION_REMOVE_MONITORED_EVENT = "removeMonitoredEvent";
 	public static final String ACTION_REGISTER_LOCAL_NOTIFICATION_RECEIVED_CALLBACK = "registerLocalNotificationReceivedCallback";
 	public static final String ACTION_SCHEDULE_LOCAL_NOTIFICATION = "scheduleLocalNotification";
 	public static final String ACTION_CANCEL_ALL_LOCAL_NOTIFICATIONS = "cancelAllLocalNotifications";
 
-	private Activity mCordovaActivity;
-	private static CallbackContext mCallbackContext;
-	private static CallbackContext mLocalNotificationReceivedCallbackContext;
+	private WeakHashMap<String, CallbackContext> mEventCallbackIds;
+	private static WeakReference<CallbackContext> mLocalNotificationReceivedCallbackContext;
 	private int mNotificationCounter = 0;
 
 	private Gson mGson;
@@ -61,51 +77,123 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 
 	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-		mCordovaActivity = this.cordova.getActivity();
-
-		Log.d(TAG, "actvity = " + mCordovaActivity.getLocalClassName());
+		if (DBG) Log.d(TAG, action);
 
 		try {
 			if (action.equalsIgnoreCase(ACTION_START_PURRING_WITH_APP_TOKEN)) {
-				Log.d(TAG, action);
+				if (args.length() > 1) {
+					JsonElement jElement = new JsonParser().parse(args.getJSONObject(1).toString());
+					JsonObject argument = jElement.getAsJsonObject();
+					Map<String, String> options = getSDKOptionsFromArgument(argument);
+					BlueCatsSDK.setOptions(options);
+					
+					if (argument.has("importLocalDatabase")) {
+						boolean importLocalDatabase = argument.get("importLocalDatabase").getAsBoolean();
+						if (importLocalDatabase) {
+							importSQLiteDatabase(this.cordova.getActivity());
+						}
+					}
+				}
 
 				String appToken = args.getString(0);
-				Log.d(TAG, "appToken = " + appToken);
+				BlueCatsSDK.startPurringWithAppToken(this.cordova.getActivity().getApplicationContext(), appToken);
 
-				BlueCatsSDK.startPurringWithAppToken(mCordovaActivity.getApplicationContext(), appToken);
+				mEventCallbackIds = new WeakHashMap<String, CallbackContext>();
 
 				sendOkClearCallback(callbackContext);
 
 				return true;
-			} else if (action.equalsIgnoreCase(ACTION_START_UPDATING_MICRO_LOCATION)) {
-				Log.d(TAG, action);
+			} else if (action.equalsIgnoreCase(ACTION_MONITOR_MICRO_LOCATION)) {
+				String eventId = args.getString(0);
+				JsonElement jElement = new JsonParser().parse(args.getJSONObject(1).toString());
+				JsonObject optionsArg = jElement.getAsJsonObject();
+				List<IBCEventFilter> filters = getFiltersFromBeaconOptionsArgument(optionsArg);
 
-				mCallbackContext = callbackContext;
+				filters.add(BCEventFilter.filterByMinTimeIntervalBetweenTriggers(getMinimumTriggerIntervalInMillisecondsFromBeaconOptionsArgument(optionsArg)));
 
-				BCMicroLocationManager.getInstance().startUpdatingMicroLocation(mBlueCatsSDKCallback);
+				BCTrigger trigger = new BCTrigger(eventId, filters);
+				trigger.setRepeatCount(getRepeatCountFromBeaconOptionsArgument(optionsArg));
 
-				return true;
-			} else if (action.equalsIgnoreCase(ACTION_STOP_UPDATING_MICRO_LOCATION)) {
-				Log.d(TAG, action);
+				BCEventManager eventManager = BCEventManager.getInstance();
+				eventManager.monitorEventWithTrigger(trigger, mEventManagerCallback);
 
-				BCMicroLocationManager.getInstance().stopUpdatingMicroLocation(mBlueCatsSDKCallback); 
-
-				if (mCallbackContext != null) {
-					sendNoResultClearCallback(mCallbackContext);
-
-					mCallbackContext = null;
+				synchronized(mEventCallbackIds) {
+					mEventCallbackIds.put(eventId, callbackContext);
 				}
 
 				return true;
-			} else if (action.equalsIgnoreCase(ACTION_REGISTER_LOCAL_NOTIFICATION_RECEIVED_CALLBACK)) {
-				Log.d(TAG, action);
+			} else if (action.equalsIgnoreCase(ACTION_MONITOR_CLOSEST_BEACON_CHANGE)) {
+				String eventId = args.getString(0);
+				JsonElement jElement = new JsonParser().parse(args.getJSONObject(1).toString());
+				JsonObject optionsArg = jElement.getAsJsonObject();
+				List<IBCEventFilter> filters = getFiltersFromBeaconOptionsArgument(optionsArg);
 
-				mLocalNotificationReceivedCallbackContext = callbackContext;
+				filters.add(BCEventFilter.filterApplySmoothedAccuracyOverTimeInterval(5000));
+				filters.add(BCEventFilter.filterByMinTimeIntervalBetweenTriggers(getMinimumTriggerIntervalInMillisecondsFromBeaconOptionsArgument(optionsArg)));
+				filters.add(BCEventFilter.filterByClosestBeaconChanged());
+
+				BCTrigger trigger = new BCTrigger(eventId, filters);
+				trigger.setRepeatCount(getRepeatCountFromBeaconOptionsArgument(optionsArg));
+
+				BCEventManager eventManager = BCEventManager.getInstance();
+				eventManager.monitorEventWithTrigger(trigger, mEventManagerCallback);
+
+				synchronized(mEventCallbackIds) {
+					mEventCallbackIds.put(eventId, callbackContext);
+				}
+
+				return true;
+			} else if (action.equalsIgnoreCase(ACTION_MONITOR_ENTER_BEACON)) {
+				String eventId = args.getString(0);
+				JsonElement jElement = new JsonParser().parse(args.getJSONObject(1).toString());
+				JsonObject optionsArg = jElement.getAsJsonObject();
+				List<IBCEventFilter> filters = getFiltersFromBeaconOptionsArgument(optionsArg);
+
+				filters.add(BCEventFilter.filterByMinTimeIntervalBetweenTriggers(getMinimumTriggerIntervalInMillisecondsFromBeaconOptionsArgument(optionsArg)));
+				filters.add(BCEventFilter.filterByEnteredBeaconResetAfterTimeIntervalUnmatched(getMillisecondsBeforeExitBeaconFromBeaconOptionsArgument(optionsArg)));
+
+				BCTrigger trigger = new BCTrigger(eventId, filters);
+				trigger.setRepeatCount(getRepeatCountFromBeaconOptionsArgument(optionsArg));
+
+				BCEventManager eventManager = BCEventManager.getInstance();
+				eventManager.monitorEventWithTrigger(trigger, mEventManagerCallback);
+
+				synchronized(mEventCallbackIds) {
+					mEventCallbackIds.put(eventId, callbackContext);
+				}
+
+				return true;
+			} else if (action.equalsIgnoreCase(ACTION_MONITOR_EXIT_BEACON)) {
+				String eventId = args.getString(0);
+				JsonElement jElement = new JsonParser().parse(args.getJSONObject(1).toString());
+				JsonObject optionsArg = jElement.getAsJsonObject();
+				List<IBCEventFilter> filters = getFiltersFromBeaconOptionsArgument(optionsArg);
+
+				filters.add(BCEventFilter.filterByMinTimeIntervalBetweenTriggers(getMinimumTriggerIntervalInMillisecondsFromBeaconOptionsArgument(optionsArg)));
+				filters.add(BCEventFilter.filterByExitedBeaconAfterTimeIntervalUnmatched(getMillisecondsBeforeExitBeaconFromBeaconOptionsArgument(optionsArg)));
+
+				BCTrigger trigger = new BCTrigger(eventId, filters);
+				trigger.setRepeatCount(getRepeatCountFromBeaconOptionsArgument(optionsArg));
+
+				BCEventManager eventManager = BCEventManager.getInstance();
+				eventManager.monitorEventWithTrigger(trigger, mEventManagerCallback);
+
+				synchronized(mEventCallbackIds) {
+					mEventCallbackIds.put(eventId, callbackContext);
+				}
+
+				return true;
+			} else if (action.equalsIgnoreCase(ACTION_REMOVE_MONITORED_EVENT)) {
+				String eventId = args.getString(0);
+				BCEventManager.getInstance().removeMonitoredEvent(eventId);
+				mEventCallbackIds.remove(eventId);
+
+				return true;
+			} else if (action.equalsIgnoreCase(ACTION_REGISTER_LOCAL_NOTIFICATION_RECEIVED_CALLBACK)) {
+				mLocalNotificationReceivedCallbackContext = new WeakReference<CallbackContext>(callbackContext);
 
 				return true;
 			} else if (action.equalsIgnoreCase(ACTION_SCHEDULE_LOCAL_NOTIFICATION)) {
-				Log.d(TAG, action);
-
 				// update the notification id counter
 				mNotificationCounter++;
 
@@ -157,7 +245,7 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 				bundle.putString("alertBody", alertContentText);
 				bundle.putBundle("userInfo", userInfoBundle);
 
-				Intent contentIntent = new Intent(mCordovaActivity, BlueCatsSDKCDVPluginLocalNotificationReveiverActivity.class);
+				Intent contentIntent = new Intent(this.cordova.getActivity(), BlueCatsSDKCDVPluginLocalNotificationReveiverActivity.class);
 				contentIntent.putExtras(bundle);
 
 				BCLocalNotification localNotification = new BCLocalNotification(mNotificationCounter);
@@ -177,7 +265,7 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 
 				return true;
 			} else if (action.equalsIgnoreCase(ACTION_CANCEL_ALL_LOCAL_NOTIFICATIONS)) {
-				Log.d(TAG, action);
+				if (DBG) Log.d(TAG, action);
 
 				BCLocalNotificationManager.getInstance().cancelAllLocalNotifications();
 
@@ -203,79 +291,59 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 	@Override
 	public void onResume(boolean multitasking) {
 		super.onResume(multitasking);
-		
-		Log.d(TAG, "onResume multitasking = " + multitasking);
-		
+
+		if (DBG) Log.d(TAG, "onResume multitasking = " + multitasking);
+
 		BCMicroLocationManager.getInstance().didEnterForeground();
 	}
 
 	@Override
 	public void onPause(boolean multitasking) {
 		super.onPause(multitasking);
-		
-		Log.d(TAG, "onPause multitasking = " + multitasking);
+
+		if (DBG) Log.d(TAG, "onPause multitasking = " + multitasking);
 
 		BCMicroLocationManager.getInstance().didEnterBackground();
 	}
 
-	private IBlueCatsSDKCallback mBlueCatsSDKCallback = new IBlueCatsSDKCallback() {
+	private BCEventManagerCallback mEventManagerCallback = new BCEventManagerCallback() {
 		@Override
-		public void onDidEnterSite(final BCSite site) {
-			Log.d(TAG, "ACTION_DID_ENTER_SITE site=" + site);
-		}
+		public void triggeredEvent(BCTriggeredEvent triggeredEvent) {
+			if (DBG) Log.d(TAG, triggeredEvent.getEvent().getEventIdentifier());
+			
+			synchronized(mEventCallbackIds) {
+				CallbackContext callbackContext = mEventCallbackIds.get(triggeredEvent.getEvent().getEventIdentifier());
+				if (callbackContext != null) {
+					try {
+						JSONObject jsonObject = new JSONObject();
+						jsonObject.put("filteredMicroLocation", new JSONObject(getGson().toJson(triggeredEvent.getFilteredMicroLocation(), BCMicroLocation.class)));
+						jsonObject.put("triggeredCount", triggeredEvent.getTriggeredCount());
 
-		@Override
-		public void onDidExitSite(final BCSite site) {
-			Log.d(TAG, "ACTION_DID_EXIT_SITE site=" + site);
-		}
-
-		@Override
-		public void onDidUpdateNearbySites(final List<BCSite> sites) {
-			Log.d(TAG, "ACTION_DID_UPDATE_NEARBY_SITES sites=" + sites);
-		}
-
-		@Override
-		public void onDidRangeBeaconsForSiteID(final BCSite site, final List<BCBeacon> beacons) {
-			Log.d(TAG, "ACTION_DID_RANGE_BEACONS_FOR_SITE_ID site=" + site + " beacons=" + beacons.size());
-		}
-
-		@Override
-		public void onDidUpdateMicroLocation(final List<BCMicroLocation> microLocations) {
-			if(mCallbackContext == null) {
-				return;
+						sendJsonObject(jsonObject, callbackContext, true);
+					} catch (JSONException e) {
+						Log.e(TAG, e.toString());
+					}
+				}
 			}
-
-			Log.d(TAG, "microLocations = " + microLocations.size());
-
-			if (microLocations == null || microLocations.size() == 0) {
-				return;
-			}
-
-			BCMicroLocation microLocation;
-			if (microLocations.size() == 2) {
-				microLocation = microLocations.get(1);
-			}
-			else
-				microLocation = microLocations.get(0);
-
-			sendMicroLocation(mCallbackContext, microLocation);
-		}
-
-		@Override
-		public void onDidNotify(final int id) {
-
 		}
 	};
 
-	private void sendMicroLocation(CallbackContext callbackContext, BCMicroLocation microLocation) {
-		if (microLocation == null) {
+	public static void sendLocalNotificationReceived(String alertAction, String alertBody, String userInfo) {
+		if (mLocalNotificationReceivedCallbackContext == null) {
+			return;
+		}
+
+		CallbackContext callbackContext = mLocalNotificationReceivedCallbackContext.get();
+		if (callbackContext == null) {
 			return;
 		}
 
 		JSONObject jsonObject;
 		try {
-			String jsonResult = getGson().toJson(microLocation, BCMicroLocation.class);
-			jsonObject = new JSONObject(jsonResult);
+			jsonObject = new JSONObject()
+			.put("alertAction", alertAction)
+			.put("alertBody", alertBody)
+			.put("userInfo", new JSONObject(userInfo));
 
 			PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, jsonObject);
 			pluginResult.setKeepCallback(true);
@@ -288,31 +356,186 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 		}
 	}
 
-	public static void sendLocalNotificationReceived(String alertAction, String alertBody, String userInfo) {
-		if (mLocalNotificationReceivedCallbackContext == null) {
-			return;
+	private Map<String, String> getSDKOptionsFromArgument(JsonObject argument) {
+		Map<String, String> optionsDictionary = new HashMap<String, String>();
+
+		if (argument == null) {
+			return optionsDictionary;
 		}
 
-		JSONObject jsonObject;
-		try {
-			jsonObject = new JSONObject()
-				.put("alertAction", alertAction)
-				.put("alertBody", alertBody)
-				.put("userInfo", new JSONObject(userInfo));
+		Map<String, Boolean> argumentDictionary = getGson().fromJson(argument.toString(), HashMap.class);
+		for (String key: argumentDictionary.keySet()) {
+			String nativeKey = getSDKOptionForKey(key);
+			if (nativeKey != null) {
+				optionsDictionary.put(nativeKey, argumentDictionary.get(key).toString());
+			}
+		}
+		return optionsDictionary;
+	}
 
-			PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, jsonObject);
-			pluginResult.setKeepCallback(true);
+	private List<IBCEventFilter> getFiltersFromBeaconOptionsArgument(JsonObject config) {
+		List<IBCEventFilter> filters = new ArrayList<IBCEventFilter>();
+		JsonObject filterSettings = config.getAsJsonObject("filter");
 
-			mLocalNotificationReceivedCallbackContext.sendPluginResult(pluginResult);
-		} catch (JSONException e) {
-			Log.e(TAG, e.toString());
-		} catch (Exception e) {
-			Log.e(TAG, e.toString());
+		if (filterSettings.has("sitesNamed")) {
+			List<String> siteNames = getGson().fromJson(filterSettings.get("sitesNamed").toString(), List.class);
+			if (siteNames != null && siteNames.size() > 0) {
+				filters.add(BCEventFilter.filterBySitesNamed(siteNames));
+			}
+		}
+
+		if (filterSettings.has("categoriesNamed")) {
+			List<String> categoryNames = getGson().fromJson(filterSettings.get("categoriesNamed").toString(), List.class);
+			if (categoryNames != null && categoryNames.size() > 0) {
+				filters.add(BCEventFilter.filterByCategoriesNamed(categoryNames));
+			}
+		}
+
+		if (filterSettings.has("minimumProximity")) {
+			BCProximity minimumProximity = getProximityKeyToNativeValue(filterSettings.get("minimumProximity").getAsString());
+			if (minimumProximity == BCProximity.BC_PROXIMITY_IMMEDIATE) {
+				filters.add(BCEventFilter.filterByProximities(Arrays.asList(new BCProximity[] { BCProximity.BC_PROXIMITY_IMMEDIATE, BCProximity.BC_PROXIMITY_NEAR, BCProximity.BC_PROXIMITY_FAR, BCProximity.BC_PROXIMITY_UNKNOWN })));
+			} else if (minimumProximity == BCProximity.BC_PROXIMITY_NEAR) {
+				filters.add(BCEventFilter.filterByProximities(Arrays.asList(new BCProximity[] { BCProximity.BC_PROXIMITY_NEAR, BCProximity.BC_PROXIMITY_FAR, BCProximity.BC_PROXIMITY_UNKNOWN })));
+			} else if (minimumProximity == BCProximity.BC_PROXIMITY_FAR) {
+				filters.add(BCEventFilter.filterByProximities(Arrays.asList(new BCProximity[] { BCProximity.BC_PROXIMITY_FAR, BCProximity.BC_PROXIMITY_UNKNOWN })));
+			} else if (minimumProximity == BCProximity.BC_PROXIMITY_UNKNOWN) {
+				filters.add(BCEventFilter.filterByProximities(Arrays.asList(new BCProximity[] { BCProximity.BC_PROXIMITY_UNKNOWN })));
+			}
+		}
+
+		if (filterSettings.has("maximumProximity")) {
+			BCProximity maximumProximity = getProximityKeyToNativeValue(filterSettings.get("maximumProximity").getAsString());
+			if (maximumProximity == BCProximity.BC_PROXIMITY_IMMEDIATE) {
+				filters.add(BCEventFilter.filterByProximities(Arrays.asList(new BCProximity[] { BCProximity.BC_PROXIMITY_IMMEDIATE })));
+			} else if (maximumProximity == BCProximity.BC_PROXIMITY_NEAR) {
+				filters.add(BCEventFilter.filterByProximities(Arrays.asList(new BCProximity[] { BCProximity.BC_PROXIMITY_IMMEDIATE, BCProximity.BC_PROXIMITY_NEAR })));
+			} else if (maximumProximity == BCProximity.BC_PROXIMITY_FAR) {
+				filters.add(BCEventFilter.filterByProximities(Arrays.asList(new BCProximity[] { BCProximity.BC_PROXIMITY_IMMEDIATE, BCProximity.BC_PROXIMITY_NEAR, BCProximity.BC_PROXIMITY_FAR })));
+			} else if (maximumProximity == BCProximity.BC_PROXIMITY_UNKNOWN) {
+				filters.add(BCEventFilter.filterByProximities(Arrays.asList(new BCProximity[] { BCProximity.BC_PROXIMITY_IMMEDIATE, BCProximity.BC_PROXIMITY_NEAR, BCProximity.BC_PROXIMITY_FAR, BCProximity.BC_PROXIMITY_UNKNOWN })));
+			}
+		}
+
+		Double minimumAccuracy = 0d;
+		Double maximumAccuracy = Double.MAX_VALUE;
+		if (filterSettings.has("minimumAccuracy") || filterSettings.has("maximumAccuracy")) {
+			if (filterSettings.has("minimumAccuracy") && filterSettings.get("minimumAccuracy").getAsDouble() > 0.0) {
+				minimumAccuracy = filterSettings.get("minimumAccuracy").getAsDouble();
+			}
+			if (filterSettings.has("maximumAccuracy") && filterSettings.get("maximumAccuracy").getAsDouble() > 0.0) {
+				maximumAccuracy = filterSettings.get("maximumAccuracy").getAsDouble();
+			}
+			filters.add(BCEventFilter.filterByAccuracyRangeFrom(minimumAccuracy, maximumAccuracy));
+		}
+
+		return filters;
+	}
+
+	private int getRepeatCountFromBeaconOptionsArgument(JsonObject config) {
+		if (config.has("repeatCount") && config.get("repeatCount").getAsInt() >= 0) {
+			return config.get("repeatCount").getAsInt();
+		}
+		return Integer.MAX_VALUE;
+	}
+
+	private long getMillisecondsBeforeExitBeaconFromBeaconOptionsArgument(JsonObject config) {
+		if (config.has("secondsBeforeExitBeacon") && config.get("secondsBeforeExitBeacon").getAsInt() >= 0) {
+			return config.get("secondsBeforeExitBeacon").getAsInt() * 1000;
+		}
+		return (10 * 1000);
+	}
+
+	private long getMinimumTriggerIntervalInMillisecondsFromBeaconOptionsArgument(JsonObject config) {
+		if (config.has("minimumTriggerIntervalInSeconds") && config.get("minimumTriggerIntervalInSeconds").getAsInt() >= 0) {
+			return config.get("minimumTriggerIntervalInSeconds").getAsInt() * 1000;
+		}
+		return 0;
+	}
+
+	private String getSDKOptionForKey(String sdkOption) {
+		if (sdkOption.equals("useStageApi")) {
+			return BlueCatsSDK.BC_OPTION_USE_STAGE_API;
+		} else if (sdkOption.equals("trackBeaconVisits")) {
+			return BlueCatsSDK.BC_OPTION_BEACON_VISIT_TRACKING_ENABLED;
+		} else if (sdkOption.equals("monitorBlueCatsRegionOnStartup")) {
+			return BlueCatsSDK.BC_OPTION_MONITOR_BLUE_CATS_REGION_ON_STARTUP;
+		} else if (sdkOption.equals("monitorAllAvailableRegionsOnStartup")) {
+			return BlueCatsSDK.BC_OPTION_MONITOR_ALL_AVAILABLE_REGIONS_ON_STARTUP;
+		} else if (sdkOption.equals("useEnergySaverScanStrategy")) {
+			return BlueCatsSDK.BC_OPTION_USE_ENERGY_SAVER_SCAN_STRATEGY;
+		} else if (sdkOption.equals("crowdSourceBeaconUpdates")) {
+			return BlueCatsSDK.BC_OPTION_CROWD_SOURCE_BEACON_UPDATES;
+		} else if (sdkOption.equals("useLocalStorage")) {
+			return BlueCatsSDK.BC_OPTION_USE_LOCAL_STORAGE;
+		} else if (sdkOption.equals("cacheAllBeaconsForApp")) {
+			return BlueCatsSDK.BC_OPTION_CACHE_ALL_BEACONS_FOR_APP;
+		} else if (sdkOption.equals("discoverBeaconsNearby")) {
+			return BlueCatsSDK.BC_OPTION_DISCOVER_BEACONS_NEARBY;
+		} else if (sdkOption.equals("cacheRefreshTimeIntervalInSeconds")) {
+			return BlueCatsSDK.BC_OPTION_CACHE_REFRESH_TIME_INTERVAL_IN_MILLISECONDS;
+		}
+		return null;
+	}
+
+	private BCProximity getProximityKeyToNativeValue(String proximityKey) {
+		if (proximityKey.equals("BC_PROXIMITY_IMMEDIATE")) {
+			return BCProximity.BC_PROXIMITY_IMMEDIATE;
+		} else if (proximityKey.equals("BC_PROXIMITY_NEAR")) {
+			return BCProximity.BC_PROXIMITY_NEAR;
+		} else if (proximityKey.equals("BC_PROXIMITY_FAR")) {
+			return BCProximity.BC_PROXIMITY_FAR;
+		}
+		return BCProximity.BC_PROXIMITY_UNKNOWN;
+	}
+	
+	private void importSQLiteDatabase(Activity activity) {
+		String packageName = activity.getPackageName();
+		String sourceDatabaseName = String.format("%s.%s", packageName, "bluecats.SQLite.db");
+		
+		String destinationDBPath = activity.getDatabasePath(sourceDatabaseName).getAbsolutePath();
+		File destinationDB = new File(destinationDBPath);
+		
+		if (destinationDB.exists()) {
+			if (DBG) Log.d(TAG, "Database already exists"); 
+		} else {
+			File dbPath = new File(destinationDB.getParent());
+			if (!dbPath.exists()) {
+				dbPath.mkdir();
+			}
+			
+			InputStream in = null;
+	        OutputStream out = null;
+	        try {
+	        	in = activity.getAssets().open(sourceDatabaseName);
+	        	out = new FileOutputStream(destinationDB);
+
+	            byte[] buffer = new byte[1024];
+	            int length;
+	            while ((length = in.read(buffer)) > 0) {
+	            	out.write(buffer, 0, length);
+	            }
+	            out.flush();
+	            
+				if (DBG) Log.d(TAG, "Exported database to " + destinationDB.getAbsolutePath()); 
+	        } catch (IOException e) {
+	        	Log.e(TAG, e.toString());
+	        } finally {
+	        	try {
+	        		if (in != null) {
+	        			in.close();
+		            }
+		            if (out != null) {
+		            	out.close();
+		            }
+	        	} catch (IOException e) {
+	        		Log.e(TAG, e.toString());  
+	            }
+	        }
 		}
 	}
 
 	private void sendOkClearCallback(CallbackContext callbackContext)	{
-		// Clear callback on the JS side.
 		PluginResult pluginResult = new PluginResult(PluginResult.Status.OK);
 		pluginResult.setKeepCallback(false);
 		callbackContext.sendPluginResult(pluginResult);
@@ -320,20 +543,30 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 
 	private void sendOkKeepCallback(CallbackContext callbackContext)	{
 		PluginResult pluginResult = new PluginResult(PluginResult.Status.OK);
-		pluginResult.setKeepCallback(false);
+		pluginResult.setKeepCallback(true);
 		callbackContext.sendPluginResult(pluginResult);
 	}
 
 	private void sendNoResultClearCallback(CallbackContext callbackContext)	{
-		// Clear callback on the JS side.
 		PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
 		pluginResult.setKeepCallback(false);
 		callbackContext.sendPluginResult(pluginResult);
 	}
 
+	private void sendNoResultKeepCallback(CallbackContext callbackContext)	{
+		PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
+		pluginResult.setKeepCallback(true);
+		callbackContext.sendPluginResult(pluginResult);
+	}
+
 	private void sendErrorMessage(CallbackContext callbackContext, String errorMessage)	{
-		// Clear callback on the JS side.
 		PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, errorMessage);
+		callbackContext.sendPluginResult(pluginResult);
+	}
+
+	private void sendJsonObject(JSONObject jsonObject, CallbackContext callbackContext, boolean keepCallback)	{
+		PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, jsonObject);
+		pluginResult.setKeepCallback(keepCallback);
 		callbackContext.sendPluginResult(pluginResult);
 	}
 }

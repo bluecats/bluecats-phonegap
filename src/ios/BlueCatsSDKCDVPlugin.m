@@ -8,7 +8,6 @@
 
 #import "BlueCatsSDKCDVPlugin.h"
 #import "BlueCatsSDK.h"
-#import "BCMicroLocationManager.h"
 #import "BCMicroLocation.h"
 #import "BCCategory.h"
 #import "BCAddress.h"
@@ -17,9 +16,8 @@
 #import "BCLocalNotification.h"
 #import "BCEventManager.h"
 
-@interface BlueCatsSDKCDVPlugin()<BCMicroLocationManagerDelegate, BCEventManagerDelegate>
+@interface BlueCatsSDKCDVPlugin()<BCEventManagerDelegate>
 
-@property NSString* updateMicroLocationCallbackId;
 @property NSString* localNotificationReceivedCallbackId;
 @property NSMutableDictionary* eventCallbackIds;
 
@@ -37,9 +35,16 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+#pragma mark Start up
+
 -(void)startPurringWithAppToken:(CDVInvokedUrlCommand *)command
 {
     NSString* appToken = [command.arguments objectAtIndex:0];
+    if (command.arguments.count > 1) {
+        NSDictionary* options = [self sdkOptionsFromArgument:[command.arguments objectAtIndex:1]];
+        [BlueCatsSDK setOptions:options];
+    }
+    
     [BlueCatsSDK startPurringWithAppToken:appToken completion:^(BCStatus status) {
         if (![BlueCatsSDK isLocationAuthorized]) {
             [BlueCatsSDK requestAlwaysLocationAuthorization];
@@ -47,83 +52,92 @@
         
         [BCEventManager sharedManager].delegate = self;
         self.eventCallbackIds = [[NSMutableDictionary alloc] init];
+        [self sendOkClearCallback:command.callbackId];
     }];
-    [self sendOkClearCallback:command.callbackId];
 }
 
--(void)startUpdatingMicroLocation:(CDVInvokedUrlCommand *)command
-{
-    // Save callbackId.
-    self.updateMicroLocationCallbackId = command.callbackId;
-    
-    BCMicroLocationManager* microLocationManager = [BCMicroLocationManager sharedManager];
-    [microLocationManager startUpdatingMicroLocation];
-    microLocationManager.delegate = self;
-}
+#pragma mark monitor beacons
 
--(void)stopUpdatingMicroLocation:(CDVInvokedUrlCommand *)command
+-(void)monitorMicroLocation:(CDVInvokedUrlCommand *)command
 {
-    [[BCMicroLocationManager sharedManager] stopUpdatingMicroLocation];
-    [[BCMicroLocationManager sharedManager] setDelegate:nil];
+    NSString* eventId = [command.arguments objectAtIndex:0];
+    NSObject* optionsArg = [command.arguments objectAtIndex:1];
+    NSMutableArray* filters = [self filtersFromBeaconOptionsArgument:optionsArg];
     
-    if (self.updateMicroLocationCallbackId)
-    {
-        // Clear JS scan callback if scan is in progress.
-        [self sendNoResultClearCallback: self.updateMicroLocationCallbackId];
-        self.updateMicroLocationCallbackId = nil;
-    }
+    [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromBeaconOptionsArgument:optionsArg]]];
     
-    [self sendOkClearCallback: command.callbackId];
+    BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:eventId andFilters:filters];
+    trigger.repeatCount = [self repeatCountFromBeaconOptionsArgument:optionsArg];
+    
+    BCEventManager* eventManager = [BCEventManager sharedManager];
+    [eventManager monitorEventWithTrigger:trigger];
+    
+    [self.eventCallbackIds setObject:command.callbackId forKey:eventId];
 }
 
 -(void)monitorClosestBeaconChange:(CDVInvokedUrlCommand*)command
 {
-    NSDictionary* config = [command.arguments firstObject];
-    NSMutableArray* filters = [[NSMutableArray alloc] init];
-    [filters addObjectsFromArray:[self filtersFromConfig:config]];
+    NSString* eventId = [command.arguments objectAtIndex:0];
+    NSObject* optionsArg = [command.arguments objectAtIndex:1];
+    NSMutableArray* filters = [self filtersFromBeaconOptionsArgument:optionsArg];
     
     [filters addObject:[BCEventFilter filterApplySmoothedAccuracyOverTimeInterval:5.0f]];
-    [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromConfig:config]]];
+    [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromBeaconOptionsArgument:optionsArg]]];
     [filters addObject:[BCEventFilter filterByClosestBeaconChanged]];
     
-    BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:command.callbackId andFilters:filters];
-    trigger.repeatCount = [self repeatCountFromConfig:config];
+    BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:eventId andFilters:filters];
+    trigger.repeatCount = [self repeatCountFromBeaconOptionsArgument:optionsArg];
     
     BCEventManager* eventManager = [BCEventManager sharedManager];
     [eventManager monitorEventWithTrigger:trigger];
+    
+    [self.eventCallbackIds setObject:command.callbackId forKey:eventId];
 }
 
 -(void)monitorEnterBeacon:(CDVInvokedUrlCommand*)command
 {
-    NSDictionary* config = [command.arguments firstObject];
-    NSMutableArray* filters = [[NSMutableArray alloc] init];
-    [filters addObjectsFromArray:[self filtersFromConfig:config]];
+    NSString* eventId = [command.arguments objectAtIndex:0];
+    NSObject* optionsArg = [command.arguments objectAtIndex:1];
+    NSMutableArray* filters = [self filtersFromBeaconOptionsArgument:optionsArg];
     
-    [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromConfig:config]]];
-    [filters addObject:[BCEventFilter filterByEnteredBeaconResetAfterTimeIntervalUnmatched:[self secondsBeforeExitBeaconFromConfig:config]]];
+    [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromBeaconOptionsArgument:optionsArg]]];
+    [filters addObject:[BCEventFilter filterByEnteredBeaconResetAfterTimeIntervalUnmatched:[self secondsBeforeExitBeaconFromBeaconOptionsArgument:optionsArg]]];
     
-    BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:command.callbackId andFilters:filters];
-    trigger.repeatCount = [self repeatCountFromConfig:config];
+    BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:eventId andFilters:filters];
+    trigger.repeatCount = [self repeatCountFromBeaconOptionsArgument:optionsArg];
     
     BCEventManager* eventManager = [BCEventManager sharedManager];
     [eventManager monitorEventWithTrigger:trigger];
+    
+    [self.eventCallbackIds setObject:command.callbackId forKey:eventId];
 }
 
 -(void)monitorExitBeacon:(CDVInvokedUrlCommand*)command
 {
-    NSDictionary* config = [command.arguments firstObject];
-    NSMutableArray* filters = [[NSMutableArray alloc] init];
-    [filters addObjectsFromArray:[self filtersFromConfig:config]];
+    NSString* eventId = [command.arguments objectAtIndex:0];
+    NSObject* optionsArg = [command.arguments objectAtIndex:1];
+    NSMutableArray* filters = [self filtersFromBeaconOptionsArgument:optionsArg];
     
-    [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromConfig:config]]];
-    [filters addObject:[BCEventFilter filterByExitedBeaconAfterTimeIntervalUnmatched:[self secondsBeforeExitBeaconFromConfig:config]]];
+    [filters addObject:[BCEventFilter filterByMinTimeIntervalBetweenTriggers:[self minimumTriggerIntervalInSecondsFromBeaconOptionsArgument:optionsArg]]];
+    [filters addObject:[BCEventFilter filterByExitedBeaconAfterTimeIntervalUnmatched:[self secondsBeforeExitBeaconFromBeaconOptionsArgument:optionsArg]]];
     
-    BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:command.callbackId andFilters:filters];
-    trigger.repeatCount = [self repeatCountFromConfig:config];
+    BCTrigger* trigger = [[BCTrigger alloc] initWithIdentifier:eventId andFilters:filters];
+    trigger.repeatCount = [self repeatCountFromBeaconOptionsArgument:optionsArg];
     
     BCEventManager* eventManager = [BCEventManager sharedManager];
     [eventManager monitorEventWithTrigger:trigger];
+    
+    [self.eventCallbackIds setObject:command.callbackId forKey:eventId];
 }
+
+-(void)removeMonitoredEvent:(CDVInvokedUrlCommand*)command
+{
+    NSString* eventId = [command.arguments objectAtIndex:0];
+    [[BCEventManager sharedManager] removeMonitoredEvent:eventId];
+    [self.eventCallbackIds removeObjectForKey:eventId];
+}
+
+#pragma mark Local notifications
 
 -(void)registerLocalNotificationReceivedCallback:(CDVInvokedUrlCommand*)command
 {
@@ -172,29 +186,29 @@
     [self sendOkClearCallback: command.callbackId];
 }
 
--(void)microLocationManager:(BCMicroLocationManager *)microLocationManger didUpdateMicroLocations:(NSArray *)microLocations
+- (void)didReceiveLocalNotification:(NSNotification *)notification
 {
-    // Send back data to JS.
-    if (self.updateMicroLocationCallbackId)
-    {
-        if (microLocationManger.microLocation) {
-            NSDictionary* data = [microLocationManger.microLocation toJSONDictionary];
-            
-            [self
-             sendDictionary: data
-             forCallback: self.updateMicroLocationCallbackId
-             keepCallback: YES];
-        }
+    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+    UILocalNotification* localNotification = [notification object];
+    NSMutableDictionary* data = [[NSMutableDictionary alloc] init];
+    [data setObject:localNotification.userInfo forKey:@"userInfo"];
+    [data setObject:localNotification.alertAction forKey:@"alertAction"];
+    [data setObject:localNotification.alertBody forKey:@"alertBody"];
+    if (self.localNotificationReceivedCallbackId) {
+        [self sendDictionary:data forCallback:self.localNotificationReceivedCallbackId keepCallback:YES];
     }
 }
 
+#pragma mark handle triggered beacon events
+
 -(void)eventManager:(BCEventManager *)eventManager triggeredEvent:(BCTriggeredEvent *)triggeredEvent
 {
-    NSString* callbackId = triggeredEvent.event.eventIdentifier;
+    NSString* callbackId = [self.eventCallbackIds objectForKey:triggeredEvent.event.eventIdentifier];
     if (callbackId) {
         NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] init];
         
         [dictionary setObject:[triggeredEvent.filteredMicroLocation toJSONDictionary] forKey:@"filteredMicroLocation"];
+        [dictionary setObject:[NSNumber numberWithInteger:triggeredEvent.triggeredCount] forKey:@"triggeredCount"];
         
         [self
          sendDictionary: dictionary
@@ -203,37 +217,63 @@
     }
 }
 
-- (NSInteger)repeatCountFromConfig:(NSDictionary*)config
+#pragma mark Plugin argument helpers
+
+-(NSNumber*)numberFromOptionsArgument:(NSObject*)optionsArgument withKey:(NSString*)key
 {
-    NSNumber* repeatCount = [config objectForKey:@"repeatCount"];
+    if (![optionsArgument isKindOfClass:[NSDictionary class]]) {
+        return nil;
+    }
+    
+    NSDictionary* options = (NSDictionary*)optionsArgument;
+    
+    if (options && [options objectForKey:key] && [[options objectForKey:key] isKindOfClass:[NSNumber class]]) {
+        return [options objectForKey:key];
+    }
+    return nil;
+}
+
+- (NSInteger)repeatCountFromBeaconOptionsArgument:(NSObject*)optionsArgument
+{
+    NSNumber* repeatCount = [self numberFromOptionsArgument:optionsArgument withKey:@"repeatCount"];
     if (repeatCount && [repeatCount integerValue] >= 0) {
         return [repeatCount integerValue];
     }
     return NSIntegerMax;
 }
 
-- (NSTimeInterval)secondsBeforeExitBeaconFromConfig:(NSDictionary*)config
+- (NSTimeInterval)secondsBeforeExitBeaconFromBeaconOptionsArgument:(NSObject*)optionsArgument
 {
-    NSNumber* secondsBeforeExitBeacon = [config objectForKey:@"secondsBeforeExitBeacon"];
+    NSNumber* secondsBeforeExitBeacon = [self numberFromOptionsArgument:optionsArgument withKey:@"secondsBeforeExitBeacon"];
     if (secondsBeforeExitBeacon && [secondsBeforeExitBeacon floatValue] > 0.0f) {
         return [secondsBeforeExitBeacon floatValue];
     }
-    return 10.0f;
+    return 5.0f;
 }
 
-- (NSTimeInterval)minimumTriggerIntervalInSecondsFromConfig:(NSDictionary*)config
+- (NSTimeInterval)minimumTriggerIntervalInSecondsFromBeaconOptionsArgument:(NSObject*)optionsArgument
 {
-    NSNumber* minimumTriggerIntervalInSeconds = [config objectForKey:@"minimumTriggerIntervalInSeconds"];
+    NSNumber* minimumTriggerIntervalInSeconds = [self numberFromOptionsArgument:optionsArgument withKey:@"minimumTriggerIntervalInSeconds"];
     if (minimumTriggerIntervalInSeconds && [minimumTriggerIntervalInSeconds floatValue] >= 0.0f) {
         return [minimumTriggerIntervalInSeconds floatValue];
     }
     return 0.0f;
 }
 
-- (NSArray*)filtersFromConfig:(NSDictionary*)config
+- (NSMutableArray*)filtersFromBeaconOptionsArgument:(NSObject*)argument
 {
     NSMutableArray* filters = [[NSMutableArray alloc] init];
-    NSDictionary* filterSettings = [config objectForKey:@"filter"];
+    
+    if (![argument isKindOfClass:[NSDictionary class]]) {
+        return filters;
+    }
+    NSDictionary* options = (NSDictionary*)argument;
+    
+    if (![options objectForKey:@"filter"] || ![[options objectForKey:@"filter"] isKindOfClass:[NSDictionary class]]) {
+        return filters;
+    }
+    
+    NSDictionary* filterSettings = [options objectForKey:@"filter"];
     
     if ([filterSettings objectForKey:@"sitesNamed"]) {
         NSArray* siteNames = [filterSettings objectForKey:@"sitesNamed"];
@@ -250,27 +290,28 @@
     }
     
     if ([filterSettings objectForKey:@"minimumProximity"]) {
-        NSString* minimumProximity = [filterSettings objectForKey:@"minimumProximity"];
-        if ([minimumProximity isEqualToString:@"BC_PROXIMITY_IMMEDIATE"]) {
+        BCProximity minimumProximity = [self proximityKeyToNativeValue:[filterSettings objectForKey:@"minimumProximity"]];
+        if (minimumProximity == BCProximityImmediate) {
             [filters addObject:[BCEventFilter filterByProximities:@[[NSNumber numberWithInt:BCProximityImmediate],[NSNumber numberWithInt:BCProximityNear],[NSNumber numberWithInt:BCProximityFar],[NSNumber numberWithInt:BCProximityUnknown]]]];
-        } else if ([minimumProximity isEqualToString:@"BC_PROXIMITY_NEAR"]) {
+        } else if (minimumProximity == BCProximityNear) {
             [filters addObject:[BCEventFilter filterByProximities:@[[NSNumber numberWithInt:BCProximityNear],[NSNumber numberWithInt:BCProximityFar],[NSNumber numberWithInt:BCProximityUnknown]]]];
-        } else if ([minimumProximity isEqualToString:@"BC_PROXIMITY_FAR"]) {
+        } else if (minimumProximity == BCProximityFar) {
             [filters addObject:[BCEventFilter filterByProximities:@[[NSNumber numberWithInt:BCProximityFar],[NSNumber numberWithInt:BCProximityUnknown]]]];
-        } else if ([minimumProximity isEqualToString:@"BC_PROXIMITY_UNKNOWN"]) {
+        } else if (minimumProximity == BCProximityUnknown) {
             [filters addObject:[BCEventFilter filterByProximities:@[[NSNumber numberWithInt:BCProximityUnknown]]]];
         }
     }
     
     if ([filterSettings objectForKey:@"maximumProximity"]) {
-        NSString* maximumProximity = [filterSettings objectForKey:@"maximumProximity"];
-        if ([maximumProximity isEqualToString:@"BC_PROXIMITY_IMMEDIATE"]) {
+        BCProximity maximumProximity = [self proximityKeyToNativeValue:[filterSettings objectForKey:@"maximumProximity"]];
+        
+        if (maximumProximity == BCProximityImmediate) {
             [filters addObject:[BCEventFilter filterByProximities:@[[NSNumber numberWithInt:BCProximityImmediate]]]];
-        } else if ([maximumProximity isEqualToString:@"BC_PROXIMITY_NEAR"]) {
+        } else if (maximumProximity == BCProximityNear) {
             [filters addObject:[BCEventFilter filterByProximities:@[[NSNumber numberWithInt:BCProximityImmediate],[NSNumber numberWithInt:BCProximityNear]]]];
-        } else if ([maximumProximity isEqualToString:@"BC_PROXIMITY_FAR"]) {
+        } else if (maximumProximity == BCProximityFar) {
             [filters addObject:[BCEventFilter filterByProximities:@[[NSNumber numberWithInt:BCProximityImmediate],[NSNumber numberWithInt:BCProximityNear],[NSNumber numberWithInt:BCProximityFar]]]];
-        } else if ([maximumProximity isEqualToString:@"BC_PROXIMITY_UNKNOWN"]) {
+        } else if (maximumProximity == BCProximityUnknown) {
             [filters addObject:[BCEventFilter filterByProximities:@[[NSNumber numberWithInt:BCProximityImmediate],[NSNumber numberWithInt:BCProximityNear],[NSNumber numberWithInt:BCProximityFar],[NSNumber numberWithInt:BCProximityUnknown]]]];
         }
     }
@@ -290,18 +331,64 @@
     return filters;
 }
 
-- (void)didReceiveLocalNotification:(NSNotification *)notification
+-(NSDictionary*)sdkOptionsFromArgument:(NSObject*)argument
 {
-    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
-    UILocalNotification* localNotification = [notification object];
-    NSMutableDictionary* data = [[NSMutableDictionary alloc] init];
-    [data setObject:localNotification.userInfo forKey:@"userInfo"];
-    [data setObject:localNotification.alertAction forKey:@"alertAction"];
-    [data setObject:localNotification.alertBody forKey:@"alertBody"];
-    if (self.localNotificationReceivedCallbackId) {
-        [self sendDictionary:data forCallback:self.localNotificationReceivedCallbackId keepCallback:YES];
+    NSMutableDictionary* optionsDictionary = [[NSMutableDictionary alloc] init];
+    
+    if (!argument || ![argument isKindOfClass:[NSDictionary class]]) {
+        return optionsDictionary;
     }
+    NSDictionary* argumentDictionary = (NSDictionary*)argument;
+    
+    for (NSString* key in [argumentDictionary allKeys]) {
+        NSString* nativeKey = [self sdkOptionForKey:key];
+        if (nativeKey && [[argumentDictionary objectForKey:key] isKindOfClass:[NSNumber class]]) {
+            [optionsDictionary setObject:[argumentDictionary objectForKey:key] forKey:nativeKey];
+        }
+    }
+    return optionsDictionary;
 }
+
+-(NSString*)sdkOptionForKey:(NSString*)sdkOption
+{
+    if ([sdkOption isEqualToString:@"useStageApi"]) {
+        return BCOptionUseStageApi;
+    } else if ([sdkOption isEqualToString:@"trackBeaconVisits"]) {
+        return BCOptionTrackBeaconVisits;
+    } else if ([sdkOption isEqualToString:@"monitorBlueCatsRegionOnStartup"]) {
+        return BCOptionMonitorBlueCatsRegionOnStartup;
+    } else if ([sdkOption isEqualToString:@"monitorAllAvailableRegionsOnStartup"]) {
+        return BCOptionMonitorAllAvailableRegionsOnStartup;
+    } else if ([sdkOption isEqualToString:@"useEnergySaverScanStrategy"]) {
+        return BCOptionUseEnergySaverScanStrategy;
+    } else if ([sdkOption isEqualToString:@"crowdSourceBeaconUpdates"]) {
+        return BCOptionCrowdSourceBeaconUpdates;
+    } else if ([sdkOption isEqualToString:@"useLocalStorage"]) {
+        return BCOptionUseLocalStorage;
+    } else if ([sdkOption isEqualToString:@"cacheAllBeaconsForApp"]) {
+        return BCOptionCacheAllBeaconsForApp;
+    } else if ([sdkOption isEqualToString:@"discoverBeaconsNearby"]) {
+        return BCOptionDiscoverBeaconsNearby;
+    } else if ([sdkOption isEqualToString:@"cacheRefreshTimeIntervalInSeconds"]) {
+        return BCOptionCacheRefreshTimeIntervalInSeconds;
+    }
+    return nil;
+}
+
+-(BCProximity)proximityKeyToNativeValue:(NSString*)proximityKey
+{
+    if ([proximityKey isEqualToString:@"BC_PROXIMITY_IMMEDIATE"]) {
+        return BCProximityImmediate;
+    } else if ([proximityKey isEqualToString:@"BC_PROXIMITY_NEAR"]) {
+        return BCProximityNear;
+    } else if ([proximityKey isEqualToString:@"BC_PROXIMITY_FAR"]) {
+        return BCProximityFar;
+    }
+    return BCProximityUnknown;
+}
+
+
+#pragma mark Plugin response helpers
 
 /**
  * Helper method.
