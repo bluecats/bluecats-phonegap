@@ -35,33 +35,55 @@ Phonegap
 - BeaconWatchOptions
 - MicroLocation
 
-## Quick Start Cordova
+## Quick Starts
 
-    cordova create MyCordovaProject
+## Hello Beacons
+
+###  Quick Start for com.bluecats.beacons plugin 
+
+This plugin provides a Phonegap or Cordova app access to Bluetooth Low Energy iBeacons and Beacons via the BlueCats (www.bluecats.com) BLE SDKs for iOS and Android.
+
+This sample creates the default 'Hello World' Phonegap project and extends with Beacon functionality.
+
+### Phonegap
+
+    phonegap create MyCordovaProject
     cd MyCordovaProject
-    cordova plugin add https://github.com/bluecats/bluecats-phonegap.git
-    cordova platform add ios
-    cordova build ios
-
-## Quick Start Phonegap
-
-    phonegap create MyPhoneGapProject
-    cd MyPhoneGapProject
     phonegap plugin add https://github.com/bluecats/bluecats-phonegap.git
-    phonegap build ios
+    cp plugins/com.bluecats.beacons/Samples/HelloBeacons/index.js www/js/index.js
 
-## com.bluecats.startPurringWithAppToken
+Edit www/js/index.js and update the line:
+
+    var blueCatsAppToken = 'BLUECATS-APP-TOKEN';
+
+replacing `BLUECATS-APP-TOKEN` with your app token generated in the BlueCats console: https://app.bluecats.com/apps
+
+If building for iOS 
+
+    phonegap platform add ios
+    phonegap build ios
+    
+If building for Android
+
+    phonegap platform add android
+    phonegap build android
+
+### Cordova
+
+If using Cordova replace the `phonegap` in the above comands with `cordova`
+
+## com.bluecats.beacons.startPurringWithAppToken
 
 Initialises the BlueCats SDK and starts scanning for bluetooth devices. The app token is generated in the BlueCats web console: https://app.bluecats.com
 
-    com.bluecats.startPurringWithAppToken(appToken, success, error, sdkOptions)
+    com.bluecats.beacons.startPurringWithAppToken(appToken, success, error, sdkOptions)
 
 ### Example
 
 ```javascript
 function success() {
-    alert('BlueCats SDK is purring);
-    //Start watching beacons using com.bluecats.watchEnterBeacon etc.
+    alert('BlueCats SDK is purring');
+    //Start watching beacons using com.bluecats.beacons.watchEnterBeacon etc.
 };
 
 function error() {
@@ -76,7 +98,7 @@ var sdkOptions = {
     cacheRefreshTimeIntervalInSeconds:300 //Period to check for changes in seconds
 };
 
-com.bluecats.startPurringWithAppToken('YOUR-APP-TOKEN', success, error, sdkOptions);
+com.bluecats.beacons.startPurringWithAppToken('YOUR-APP-TOKEN', success, error, sdkOptions);
 ```
 
 ## com.bluecats.beacons.watchMicroLocation
@@ -114,7 +136,7 @@ var beaconWatchOptions = {
     	minimumAccuracy:0, //Number. Minimum distance in metres (Default 0)
         maximumAccuracy:0.5 //Number. Maximum distnace in metres (Default unrestricted)
         sitesNamed:['Site1','Another Site'],//Array of string. Only include beacons in specified sites
-        categoriesNames:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
+        categoriesNamed:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
 
     }
 };
@@ -161,7 +183,7 @@ var beaconWatchOptions = {
     	minimumAccuracy:0, //Number. Minimum distance in metres (Default 0)
         maximumAccuracy:0.5 //Number. Maximum distnace in metres (Default unrestricted)
         sitesNamed:['Site1','Another Site'],//Array of string. Only include beacons in specified sites
-        categoriesNames:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
+        categoriesNamed:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
     }
 };
 
@@ -206,7 +228,7 @@ var beaconWatchOptions = {
     	minimumAccuracy:0, //Number. Minimum distance in metres (Default 0)
         maximumAccuracy:0.5 //Number. Maximum distnace in metres (Default unrestricted)
         sitesNamed:['Site1','Another Site'],//Array of string. Only include beacons in specified sites
-        categoriesNames:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
+        categoriesNamed:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
     }
 };
 
@@ -252,7 +274,7 @@ var beaconWatchOptions = {
     	minimumAccuracy:0, //Number. Minimum distance in metres (Default 0)
         maximumAccuracy:0.5 //Number. Maximum distnace in metres (Default unrestricted)
         sitesNamed:['Site1','Another Site'],//Array of string. Only include beacons in specified sites
-        categoriesNames:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
+        categoriesNamed:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
     }
 };
 

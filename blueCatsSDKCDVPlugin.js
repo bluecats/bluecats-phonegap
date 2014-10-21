@@ -4,245 +4,117 @@
 
 // The following line causes a jsdoc error.
 // Use the jsdoc option -l to ignore the error.
-var exec = cordova.require('cordova/exec');
+var exec = cordova.require('cordova/exec'),
+	utils = require("cordova/utils");
 
-/** @module com.blueCats.BlueCatsSDKCDVPlugin */
+/** @module com.bluecats.beacons */
 
-/** Starts monitoring of BlueCats beacons.
-*
-* @param {appToken} blueCats SDK app token. See http://www.bluecats.com for info.
-* @param {successCallback} win
-* @param {failCallback} fail
-*
-* @example
-com.blueCats.BlueCatsSDKCDVPlugin.startPurringWithAppToken(
-	function()
-	{
-		console.log('BlueCats is purring...');
-	},
-	function(errorCode)
-	{
-		console.log('BlueCats won't purr: ' + errorCode);
-	}
-);
-*/
-exports.startPurringWithAppToken = function(appToken, win, fail) {
-	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'startPurringWithAppToken', [appToken]);
+/**
+     * Starts monitoring for BlueCats beacons
+     *
+     * @param String appToken              BlueCats appToken
+     * @param {Function} success           The function to call when SDK is started. (OPTIONAL)
+     * @param {Function} fail              The function to call when there is an error. (OPTIONAL)
+     * @param {SDKOptions} options         Configuration options for the BlueCats SDK (OPTIONAL)
+     */
+exports.startPurringWithAppToken = function(appToken, success, fail, options) {
+	exec(success, fail, 'BlueCatsSDKCDVPlugin', 'startPurringWithAppToken', [appToken, options]);
 };
 
-/** Register callback for info about ranged beacons.
-*
-* @param {microLocationUpdateCallback} win
-* @param {failCallback} fail
-*
-* @example
-com.blueCats.BlueCatsSDKCDVPlugin.startUpdatingMicroLocation(
-	function(microLocation)
-	{
-		console.log('MicroLocation was updated: ' + JSON.stringify(microLocation));
-	},
-	function(errorCode)
-	{
-		console.log('MicroLocation update failed ' + errorCode);
-	}
-);
-*/
-exports.startUpdatingMicroLocation = function(win, fail) {
-	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'startUpdatingMicroLocation', []);
+/**
+     * Asynchronously notifies beacons within range
+     *
+     * @param {Function} success           The function to call each time new beacons are discovered
+     * @param {Function} fail              The function to call when there is an error. (OPTIONAL)
+     * @param {WatchBeaconOptions} options The options for watching beacons (OPTIONAL)
+     * @return String                      The watch id that must be passed to #clearWatch to stop watching.
+     */
+exports.watchMicroLocation = function(success, fail, options){
+	var watchId = utils.createUUID();
+	exec(success, fail, 'BlueCatsSDKCDVPlugin', 'monitorMicroLocation', [watchId, options]);
+	return watchId;
 };
 
-/** Cancel callback for ranged beacons.
-*
-* @param {successCallback} win
-* @param {failCallback} fail
-*
-* @example
-com.blueCats.BlueCatsSDKCDVPlugin.stopUpdatingMicroLocation(
-	function()
-	{
-		console.log('MicroLocation updates stopped');
-	},
-	function(errorCode)
-	{
-		console.log('MicroLocation update failed ' + errorCode);
-	}
-);
-*/
-exports.stopUpdatingMicroLocation = function(win, fail) {
-	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'stopUpdatingMicroLocation', []);
+/**
+     * Asynchronously notifies entering range of beacons
+     *
+     * @param {Function} success           The function to call each time new beacons are discovered
+     * @param {Function} fail              The function to call when there is an error. (OPTIONAL)
+     * @param {WatchBeaconOptions} options The options for watching beacons (OPTIONAL)
+     * @return String                      The watch id that must be passed to #clearWatch to stop watching.
+     */
+exports.watchClosestBeaconChange = function(success, fail, options) {
+	var watchId = utils.createUUID();
+	exec(success, fail, 'BlueCatsSDKCDVPlugin', 'monitorClosestBeaconChange', [watchId, options]);
+	return watchId;
 };
 
-/** Register a callback to handle local notifications
-*
-* @param {successCallback} function to be called when a local notification is received
-* @param {failCallback} fail
-*
-* @example
-com.blueCats.BlueCatsSDKCDVPlugin.registerLocalNotificationReceivedCallback(
-	function(localNotifictionUserInfo)
-	{
-		console.log('Local notification received');
-	},
-	function(errorCode)
-	{
-		console.log('Local notification schedule failed ' + errorCode);
-	}
-);
-*/
-exports.registerLocalNotificationReceivedCallback = function(win, fail) {
-	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'registerLocalNotificationReceivedCallback', []);
+/**
+     * Asynchronously notifies entering range of beacons
+     *
+     * @param {Function} success           The function to call each time new beacons are discovered
+     * @param {Function} fail              The function to call when there is an error. (OPTIONAL)
+     * @param {WatchBeaconOptions} options The options for watching beacons (OPTIONAL)
+     * @return String                      The watch id that must be passed to #clearWatch to stop watching.
+     */
+exports.watchEnterBeacon = function(success, fail, options) {
+	var watchId = utils.createUUID();
+	exec(success, fail, 'BlueCatsSDKCDVPlugin', 'monitorEnterBeacon', [watchId, options]);
+	return watchId;
+};
+
+/**
+     * Asynchronously notifies exiting range of beacons
+     *
+     * @param {Function} success           The function to call each time new beacons are discovered
+     * @param {Function} fail              The function to call when there is an error. (OPTIONAL)
+     * @param {WatchBeaconOptions} options The options for watching beacons (OPTIONAL)
+     * @return String                      The watch id that must be passed to #clearWatch to stop watching.
+     */
+exports.watchExitBeacon = function(success, fail, options) {
+	var watchId = utils.createUUID();
+	exec(success, fail, 'BlueCatsSDKCDVPlugin', 'monitorExitBeacon', [watchId, options]);
+	return watchId;
+};
+
+/**
+     * Clear the watched beacon event
+     *
+     * @param String watchId      The watchId to clear
+     * @param {Function} success  The function to call when the watched callback is cancelled (OPTIONAL)
+     * @param {Function} fail     The function to call when there is an error. (OPTIONAL)
+     */
+exports.clearWatch = function(watchId, success, fail) {
+	exec(success, fail, 'BlueCatsSDKCDVPlugin', 'removeMonitoredEvent', [watchId]);
+};
+
+/**
+     * Calls success function when a local notification is opened
+     *
+     * @param {Function} success  The function to call when the watched callback is cancelled (OPTIONAL)
+     * @param {Function} fail     The function to call when there is an error. (OPTIONAL)
+     */
+exports.localNotificationReceived = function(success, fail) {
+	exec(success, fail, 'BlueCatsSDKCDVPlugin', 'registerLocalNotificationReceivedCallback', []);
 };
 
 /** Schedule a local notification to be triggered by a beacon.
 *
 * @param {localNotification} localNotification
-* @param {successCallback} win
+* @param {successCallback} success
 * @param {failCallback} fail
 *
-* @example
-com.blueCats.BlueCatsSDKCDVPlugin.scheduleLocalNotification(
-	{
-        fireInCategories : [{ name : 'MyTriggerCategory' }],
-        fireAfterDelayInSeconds : 5,
-        alertAction : 'Test Action',
-        alertBody : 'This is my phonegap notification'
-    },
-	function()
-	{
-		console.log('Local notification scheduled');
-	},
-	function(errorCode)
-	{
-		console.log('Local notification schedule failed ' + errorCode);
-	}
-);
 */
-exports.scheduleLocalNotification = function(localNotification, win, fail) {
-	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'scheduleLocalNotification', [localNotification]);
+exports.scheduleLocalNotification = function(localNotification, success, fail) {
+	exec(success, fail, 'BlueCatsSDKCDVPlugin', 'scheduleLocalNotification', [localNotification]);
 };
 
 /** Cancel all scheduled beacon local notifications
 *
-* @param {successCallback} win
+* @param {successCallback} success
 * @param {failCallback} fail
 *
-* @example
-com.blueCats.BlueCatsSDKCDVPlugin.cancelAllLocalNotifications(
-	function()
-	{
-		console.log('All beacon local notifications cancelled');
-	},
-	function(errorCode)
-	{
-		console.log('Local notification cancel failed ' + errorCode);
-	}
-);
 */
-exports.cancelAllLocalNotifications = function(win, fail) {
-	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'cancelAllLocalNotifications', []);
-};
-
-/** Register a callback to be notified when the closest beacon changes
-*
-* @param {config} config
-* @param {successCallback} win
-* @param {failCallback} fail
-*
-* @example
-com.blueCats.BlueCatsSDKCDVPlugin.monitorClosestBeaconChange(
-	{
-        secondsBeforeExitBeacon:10.0,
-        minimumTriggerIntervalInSeconds:5.0,
-        filter:
-        {
-            sitesNamed:['My Site'],
-            categoriesNamed:['Entrance'],
-            minimumProximity:'BC_PROXIMITY_IMMEDIATE',
-            maximumProximity:'BC_PROXIMITY_NEAR',
-            minimumAccuracy:0.0,
-            maximumAccuarcy:2.0
-        }
-    },
-	function(eventData)
-	{
-		console.log('Closest beacon changed');
-	},
-	function(error)
-	{
-		console.log('Closest beacon failed' + error);
-	}
-);
-*/
-exports.monitorClosestBeaconChange = function(config, win, fail) {
-	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'monitorClosestBeaconChange', [config]);
-};
-
-/** Register a callback to be notified when entering range of beacon
-*
-* @param {config} config
-* @param {successCallback} win
-* @param {failCallback} fail
-*
-* @example
-com.blueCats.BlueCatsSDKCDVPlugin.monitorEnterBeacon(
-	{
-        secondsBeforeExitBeacon:10.0,
-        minimumTriggerIntervalInSeconds:5.0,
-        filter:
-        {
-            sitesNamed:['My Site'],
-            categoriesNamed:['Entrance'],
-            minimumProximity:'BC_PROXIMITY_IMMEDIATE',
-            maximumProximity:'BC_PROXIMITY_NEAR',
-            minimumAccuracy:0.0,
-            maximumAccuarcy:2.0
-        }
-    },
-	function(eventData)
-	{
-		console.log('Entered beacon');
-	},
-	function(error)
-	{
-		console.log('Enter beacon failed' + error);
-	}
-);
-*/
-exports.monitorEnterBeacon = function(config, win, fail) {
-	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'monitorEnterBeacon', [config]);
-};
-
-/** Register a callback to be notified when exiting range of a beacon
-*
-* @param {config} config
-* @param {successCallback} win
-* @param {failCallback} fail
-*
-* @example
-com.blueCats.BlueCatsSDKCDVPlugin.monitorExitBeacon(
-	{
-        secondsBeforeExitBeacon:10.0,
-        minimumTriggerIntervalInSeconds:5.0,
-        filter:
-        {
-            sitesNamed:['My Site'],
-            categoriesNamed:['Entrance'],
-            minimumProximity:'BC_PROXIMITY_IMMEDIATE',
-            maximumProximity:'BC_PROXIMITY_NEAR',
-            minimumAccuracy:0.0,
-            maximumAccuarcy:2.0
-        }
-    },
-	function(eventData)
-	{
-		console.log('Exited beacon');
-	},
-	function(error)
-	{
-		console.log('Exit beacon failed' + error);
-	}
-);
-*/
-exports.monitorExitBeacon = function(config, win, fail) {
-	exec(win, fail, 'BlueCatsSDKCDVPlugin', 'monitorExitBeacon', [config]);
+exports.cancelAllLocalNotifications = function(success, fail) {
+	exec(success, fail, 'BlueCatsSDKCDVPlugin', 'cancelAllLocalNotifications', []);
 };

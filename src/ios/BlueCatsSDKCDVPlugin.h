@@ -14,12 +14,11 @@
 // Public Cordova API.
 - (void) startPurringWithAppToken: (CDVInvokedUrlCommand*)command;
 
-- (void) startUpdatingMicroLocation: (CDVInvokedUrlCommand*)command;
-- (void) stopUpdatingMicroLocation: (CDVInvokedUrlCommand*)command;
-
+- (void) monitorMicroLocation:(CDVInvokedUrlCommand *)command;
 - (void) monitorClosestBeaconChange:(CDVInvokedUrlCommand*)command;
 - (void) monitorEnterBeacon:(CDVInvokedUrlCommand*)command;
 - (void) monitorExitBeacon:(CDVInvokedUrlCommand*)command;
+- (void) removeMonitoredEvent:(CDVInvokedUrlCommand*)command;
 
 - (void) registerLocalNotificationReceivedCallback:(CDVInvokedUrlCommand*)command;
 - (void) scheduleLocalNotification:(CDVInvokedUrlCommand *)command;
