@@ -308,7 +308,7 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 
 	private BCEventManagerCallback mEventManagerCallback = new BCEventManagerCallback() {
 		@Override
-		public void triggeredEvent(BCTriggeredEvent triggeredEvent) {
+		public void onTriggeredEvent(BCTriggeredEvent triggeredEvent) {
 			if (DBG) Log.d(TAG, triggeredEvent.getEvent().getEventIdentifier());
 			
 			synchronized(mEventCallbackIds) {
