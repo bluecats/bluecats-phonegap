@@ -452,11 +452,11 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 			if (nativeKey != null) {
 				Object value = argumentDictionary.get(key);
 				if (value instanceof Boolean) {
-					optionsDictionary.put(nativeKey, Boolean.toString((boolean)value));
+					optionsDictionary.put(nativeKey, Boolean.toString(Boolean.class.cast(value)));
 				} else if (value instanceof Long) {
-					optionsDictionary.put(nativeKey, Long.toString((long)value));
+					optionsDictionary.put(nativeKey, Long.toString(Long.class.cast(value)));
 				} else if (value instanceof Double) {
-					optionsDictionary.put(nativeKey, Long.toString(((Double)value).longValue()));
+					optionsDictionary.put(nativeKey, Long.toString(Double.class.cast(value).longValue()));
 				} 
 			}
 		}
