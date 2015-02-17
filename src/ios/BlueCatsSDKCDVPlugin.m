@@ -11,7 +11,7 @@
 #import "BCMicroLocation.h"
 #import "BCCategory.h"
 #import "BCAddress.h"
-#import "BCMicroLocation+JSON.h"
+#import "BCSite.h"
 #import "BCLocalNotificationManager.h"
 #import "BCLocalNotification.h"
 #import "BCEventManager.h"
@@ -206,8 +206,24 @@
     NSString* callbackId = [self.eventCallbackIds objectForKey:triggeredEvent.event.eventIdentifier];
     if (callbackId) {
         NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] init];
+        NSMutableArray* beacons = [[NSMutableArray alloc] init];
+        NSMutableArray* sites = [[NSMutableArray alloc] init];
         
-        [dictionary setObject:[triggeredEvent.filteredMicroLocation toJSONDictionary] forKey:@"filteredMicroLocation"];
+        for (BCBeacon* beacon in triggeredEvent.filteredMicroLocation.beacons) {
+            NSMutableDictionary* beaconDictionary = [[NSMutableDictionary alloc] initWithDictionary:[beacon toDictionary]];
+            [beaconDictionary setObject:[self proximityToString:beacon.proximity] forKey:@"proximity"];
+            [beacons addObject:beaconDictionary];
+        }
+        for (BCSite* site in triggeredEvent.filteredMicroLocation.sites) {
+            [sites addObject:[site toDictionary]];
+        }
+        
+        NSMutableDictionary* filteredMicroLocation = [[NSMutableDictionary alloc] init];
+        
+        [filteredMicroLocation setObject:beacons forKey:@"beacons"];
+        [filteredMicroLocation setObject:sites forKey:@"sites"];
+        
+        [dictionary setObject:filteredMicroLocation forKey:@"filteredMicroLocation"];
         [dictionary setObject:[NSNumber numberWithInteger:triggeredEvent.triggeredCount] forKey:@"triggeredCount"];
         
         [self
@@ -387,6 +403,17 @@
     return BCProximityUnknown;
 }
 
+-(NSString*)proximityToString:(BCProximity)proximity
+{
+    if (proximity == BCProximityImmediate) {
+        return @"BC_PROXIMITY_IMMEDIATE";
+    } else if (proximity == BCProximityNear) {
+        return @"BC_PROXIMITY_NEAR";
+    } else if (proximity == BCProximityFar) {
+        return @"BC_PROXIMITY_FAR";
+    }
+    return @"BC_PROXIMITY_UNKNOWN";
+}
 
 #pragma mark Plugin response helpers
 

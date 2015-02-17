@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
 	id="com.bluecats.beacons"
-	version="1.0.0">
+	version="0.0.3">
 
 	<!-- This plugin requires Cordova version 3.1.0 or newer. -->
 	<engines>
@@ -26,9 +26,6 @@
 		<header-file src="src/ios/BlueCatsSDKCDVPlugin.h" />
 		<source-file src="src/ios/BlueCatsSDKCDVPlugin.m" />
 
-		<header-file src="src/ios/BCMicroLocation+JSON.h" />
-		<source-file src="src/ios/BCMicroLocation+JSON.m" />
-
 		<framework src="Foundation.framework" />
 		<framework src="CoreData.framework" />
 		<framework src="AdSupport.framework" />
@@ -39,133 +36,32 @@
 		<framework src="Security.framework" />
 		<framework src="CFNetwork.framework" />
 
-		<header-file src="src/ios/RestKit/AFHTTPClient.h"/>
-		<header-file src="src/ios/RestKit/AFHTTPRequestOperation.h"/>
-		<header-file src="src/ios/RestKit/AFImageRequestOperation.h"/>
-		<header-file src="src/ios/RestKit/AFJSONRequestOperation.h"/>
-		<header-file src="src/ios/RestKit/AFNetworkActivityIndicatorManager.h"/>
-		<header-file src="src/ios/RestKit/AFNetworking.h"/>
-		<header-file src="src/ios/RestKit/AFPropertyListRequestOperation.h"/>
-		<header-file src="src/ios/RestKit/AFURLConnectionOperation.h"/>
-		<header-file src="src/ios/RestKit/AFXMLRequestOperation.h"/>
-		<header-file src="src/ios/RestKit/CoreData.h"/>
-		<header-file src="src/ios/RestKit/ISO8601DateFormatterValueTransformer.h"/>
-		<header-file src="src/ios/RestKit/lcl_config_components_RK.h"/>
-		<header-file src="src/ios/RestKit/lcl_config_extensions_RK.h"/>
-		<header-file src="src/ios/RestKit/lcl_config_logger_RK.h"/>
-		<header-file src="src/ios/RestKit/lcl_RK.h"/>
-		<header-file src="src/ios/RestKit/LCLNSLog_RK.h"/>
-		<header-file src="src/ios/RestKit/Network.h"/>
-		<header-file src="src/ios/RestKit/NSManagedObject+RKAdditions.h"/>
-		<header-file src="src/ios/RestKit/NSManagedObjectContext+RKAdditions.h"/>
-		<header-file src="src/ios/RestKit/ObjectMapping.h"/>
-		<header-file src="src/ios/RestKit/RestKit.h"/>
-		<header-file src="src/ios/RestKit/RKAttributeMapping.h"/>
-		<header-file src="src/ios/RestKit/RKBenchmark.h"/>
-		<header-file src="src/ios/RestKit/RKConnectionDescription.h"/>
-		<header-file src="src/ios/RestKit/RKConnectionTestExpectation.h"/>
-		<header-file src="src/ios/RestKit/RKDictionaryUtilities.h"/>
-		<header-file src="src/ios/RestKit/RKDotNetDateFormatter.h"/>
-		<header-file src="src/ios/RestKit/RKDynamicMapping.h"/>
-		<header-file src="src/ios/RestKit/RKEntityByAttributeCache.h"/>
-		<header-file src="src/ios/RestKit/RKEntityCache.h"/>
-		<header-file src="src/ios/RestKit/RKEntityMapping.h"/>
-		<header-file src="src/ios/RestKit/RKErrorMessage.h"/>
-		<header-file src="src/ios/RestKit/RKErrors.h"/>
-		<header-file src="src/ios/RestKit/RKFetchRequestManagedObjectCache.h"/>
-		<header-file src="src/ios/RestKit/RKHTTPRequestOperation.h"/>
-		<header-file src="src/ios/RestKit/RKHTTPUtilities.h"/>
-		<header-file src="src/ios/RestKit/RKInMemoryManagedObjectCache.h"/>
-		<header-file src="src/ios/RestKit/RKISO8601DateFormatter.h"/>
-		<header-file src="src/ios/RestKit/RKLog.h"/>
-		<header-file src="src/ios/RestKit/RKMacros.h"/>
-		<header-file src="src/ios/RestKit/RKManagedObjectCaching.h"/>
-		<header-file src="src/ios/RestKit/RKManagedObjectImporter.h"/>
-		<header-file src="src/ios/RestKit/RKManagedObjectMappingOperationDataSource.h"/>
-		<header-file src="src/ios/RestKit/RKManagedObjectRequestOperation.h"/>
-		<header-file src="src/ios/RestKit/RKManagedObjectStore.h"/>
-		<header-file src="src/ios/RestKit/RKManagedObjectStore+RKSearchAdditions.h"/>
-		<header-file src="src/ios/RestKit/RKMapperOperation.h"/>
-		<header-file src="src/ios/RestKit/RKMapping.h"/>
-		<header-file src="src/ios/RestKit/RKMappingErrors.h"/>
-		<header-file src="src/ios/RestKit/RKMappingOperation.h"/>
-		<header-file src="src/ios/RestKit/RKMappingOperationDataSource.h"/>
-		<header-file src="src/ios/RestKit/RKMappingResult.h"/>
-		<header-file src="src/ios/RestKit/RKMappingTest.h"/>
-		<header-file src="src/ios/RestKit/RKMIMETypes.h"/>
-		<header-file src="src/ios/RestKit/RKMIMETypeSerialization.h"/>
-		<header-file src="src/ios/RestKit/RKNSJSONSerialization.h"/>
-		<header-file src="src/ios/RestKit/RKObjectManager.h"/>
-		<header-file src="src/ios/RestKit/RKObjectMapping.h"/>
-		<header-file src="src/ios/RestKit/RKObjectMappingMatcher.h"/>
-		<header-file src="src/ios/RestKit/RKObjectMappingOperationDataSource.h"/>
-		<header-file src="src/ios/RestKit/RKObjectParameterization.h"/>
-		<header-file src="src/ios/RestKit/RKObjectRequestOperation.h"/>
-		<header-file src="src/ios/RestKit/RKObjectRequestOperationSubclass.h"/>
-		<header-file src="src/ios/RestKit/RKObjectUtilities.h"/>
-		<header-file src="src/ios/RestKit/RKOperationStateMachine.h"/>
-		<header-file src="src/ios/RestKit/RKPaginator.h"/>
-		<header-file src="src/ios/RestKit/RKPathMatcher.h"/>
-		<header-file src="src/ios/RestKit/RKPathUtilities.h"/>
-		<header-file src="src/ios/RestKit/RKPropertyInspector.h"/>
-		<header-file src="src/ios/RestKit/RKPropertyInspector+CoreData.h"/>
-		<header-file src="src/ios/RestKit/RKPropertyMapping.h"/>
-		<header-file src="src/ios/RestKit/RKPropertyMappingTestExpectation.h"/>
-		<header-file src="src/ios/RestKit/RKRelationshipConnectionOperation.h"/>
-		<header-file src="src/ios/RestKit/RKRelationshipMapping.h"/>
-		<header-file src="src/ios/RestKit/RKRequestDescriptor.h"/>
-		<header-file src="src/ios/RestKit/RKResponseDescriptor.h"/>
-		<header-file src="src/ios/RestKit/RKResponseMapperOperation.h"/>
-		<header-file src="src/ios/RestKit/RKRoute.h"/>
-		<header-file src="src/ios/RestKit/RKRouter.h"/>
-		<header-file src="src/ios/RestKit/RKRouteSet.h"/>
-		<header-file src="src/ios/RestKit/RKSearchIndexer.h"/>
-		<header-file src="src/ios/RestKit/RKSearchPredicate.h"/>
-		<header-file src="src/ios/RestKit/RKSearchWord.h"/>
-		<header-file src="src/ios/RestKit/RKSearchWordEntity.h"/>
-		<header-file src="src/ios/RestKit/RKSerialization.h"/>
-		<header-file src="src/ios/RestKit/RKStringTokenizer.h"/>
-		<header-file src="src/ios/RestKit/RKTestFactory.h"/>
-		<header-file src="src/ios/RestKit/RKTestFixture.h"/>
-		<header-file src="src/ios/RestKit/RKTestHelpers.h"/>
-		<header-file src="src/ios/RestKit/RKTestNotificationObserver.h"/>
-		<header-file src="src/ios/RestKit/RKURLEncodedSerialization.h"/>
-		<header-file src="src/ios/RestKit/RKValueTransformers.h"/>
-		<header-file src="src/ios/RestKit/Search.h"/>
-		<header-file src="src/ios/RestKit/SOCKit.h"/>
-		<header-file src="src/ios/RestKit/Support.h"/>
-		<header-file src="src/ios/RestKit/Testing.h"/>
-		<header-file src="src/ios/RestKit/TKEvent.h"/>
-		<header-file src="src/ios/RestKit/TKState.h"/>
-		<header-file src="src/ios/RestKit/TKStateMachine.h"/>
-		<header-file src="src/ios/RestKit/TransitionKit.h"/>
-		<header-file src="src/ios/RestKit/UIImageView+AFNetworking.h"/>
-
-		<source-file src="src/ios/RestKit/libRestKit.a" framework="true" />
-
 		<header-file src="src/ios/BlueCatsSDK/BlueCatsSDK.h" />
-		<header-file src="src/ios/BlueCatsSDK/BCApp.h" />
-		<header-file src="src/ios/BlueCatsSDK/BCMicroLocationManager.h" />
-		<header-file src="src/ios/BlueCatsSDK/BCMicroLocation.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCAddress.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCApp.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCBeacon.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCBeaconRegionVisit.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCBeaconVisit.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCBeaconDataSource.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCCategory.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCCategoryDataSource.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCCustomValue.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCEvent.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCEventManager.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCEventFilter.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCEventFilterContext.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCJSONModel.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCLocalNotification.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCLocalNotificationManager.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCMap.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCMapPoint.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCMicroLocationManager.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCMicroLocation.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCPoint.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCResource.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCSite.h" />
-		<header-file src="src/ios/BlueCatsSDK/BCEventManager.h" />
-		<header-file src="src/ios/BlueCatsSDK/BCEvent.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCTriggeredEvent.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCTrigger.h" />
-		<header-file src="src/ios/BlueCatsSDK/BCEventFilter.h" />
-		<header-file src="src/ios/BlueCatsSDK/BCEventFilterContext.h" />
 
 		<source-file src="src/ios/BlueCatsSDK/libBlueCatsSDK.a" framework="true" />
 

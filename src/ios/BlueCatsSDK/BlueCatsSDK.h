@@ -39,8 +39,13 @@ typedef NS_ENUM(int, BCAppTokenVerificationStatus) {
 + (BOOL)isLocationAuthorized;
 + (BOOL)isBluetoothEnabled;
 
+#if defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
 + (void)requestAlwaysLocationAuthorization;
 + (void)requestWhenInUseLocationAuthorization;
+#else
++ (void)requestLocationAuthorization;
+#endif
+
 
 +(BCApp*) currentApp;
 
@@ -56,5 +61,6 @@ extern NSString * const BCOptionUseLocalStorage;
 extern NSString * const BCOptionCacheAllBeaconsForApp;
 extern NSString * const BCOptionDiscoverBeaconsNearby;
 extern NSString * const BCOptionCacheRefreshTimeIntervalInSeconds;
+extern NSString * const BCOptionShowBluetoothPowerWarningMessage;
 
 
