@@ -23,6 +23,10 @@
 			</feature>
 		</config-file>
 
+		<config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
+		  <string>Beacons customise the app experience for your location</string>
+		</config-file>
+
 		<header-file src="src/ios/BlueCatsSDKCDVPlugin.h" />
 		<source-file src="src/ios/BlueCatsSDKCDVPlugin.m" />
 
