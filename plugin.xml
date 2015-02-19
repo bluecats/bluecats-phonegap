@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
 	id="com.bluecats.beacons"
-	version="0.0.3">
+	version="0.0.4">
 
 	<!-- This plugin requires Cordova version 3.1.0 or newer. -->
 	<engines>
