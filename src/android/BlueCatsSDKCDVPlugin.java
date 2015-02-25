@@ -378,7 +378,7 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 
 		if (DBG) Log.d(TAG, "onResume multitasking = " + multitasking);
 
-		BCMicroLocationManager.getInstance().didEnterForeground();
+		BlueCatsSDK.didEnterForeground();
 	}
 
 	@Override
@@ -387,7 +387,7 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 
 		if (DBG) Log.d(TAG, "onPause multitasking = " + multitasking);
 
-		BCMicroLocationManager.getInstance().didEnterBackground();
+		BlueCatsSDK.didEnterBackground();
 	}
 
 	private BCEventManagerCallback mEventManagerCallback = new BCEventManagerCallback() {
