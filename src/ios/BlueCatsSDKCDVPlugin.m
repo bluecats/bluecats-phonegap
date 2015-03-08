@@ -212,6 +212,13 @@
         for (BCBeacon* beacon in triggeredEvent.filteredMicroLocation.beacons) {
             NSMutableDictionary* beaconDictionary = [[NSMutableDictionary alloc] initWithDictionary:[beacon toDictionary]];
             [beaconDictionary setObject:[self proximityToString:beacon.proximity] forKey:@"proximity"];
+            [beaconDictionary setObject:[NSNumber numberWithDouble:beacon.accuracy] forKey:@"accuracy"];
+            if (beacon.siteName != nil) {
+                [beaconDictionary setObject:beacon.siteName forKey:@"siteName"];
+            }
+            if (beacon.rssi != nil) {
+                [beaconDictionary setObject:beacon.rssi forKey:@"rssi"];
+            }
             [beacons addObject:beaconDictionary];
         }
         for (BCSite* site in triggeredEvent.filteredMicroLocation.sites) {
