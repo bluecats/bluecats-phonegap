@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
 	id="com.bluecats.beacons"
-	version="0.0.3">
+	version="1.0.2">
 
 	<!-- This plugin requires Cordova version 3.1.0 or newer. -->
 	<engines>
@@ -21,6 +21,10 @@
 			<feature name="BlueCatsSDKCDVPlugin">
 				<param name="ios-package" value="BlueCatsSDKCDVPlugin"/>
 			</feature>
+		</config-file>
+
+		<config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
+		  <string>Beacons customise the app experience for your location</string>
 		</config-file>
 
 		<header-file src="src/ios/BlueCatsSDKCDVPlugin.h" />
@@ -105,8 +109,6 @@
 	    <source-file src="src/android/libs/bluecats_sdk.jar" target-dir="libs" /> 
 	    <source-file src="src/android/libs/google-play-services.jar" target-dir="libs" />
 	    <source-file src="src/android/libs/gson-2.2.4.jar" target-dir="libs" />
-	    <source-file src="src/android/libs/org.restlet.ext.json.jar" target-dir="libs" />
-	    <source-file src="src/android/libs/org.restlet.jar" target-dir="libs" />
     </platform>
     
 </plugin>

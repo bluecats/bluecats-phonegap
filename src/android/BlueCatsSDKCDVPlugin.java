@@ -154,7 +154,6 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 							JsonObject optionsArg = jElement.getAsJsonObject();
 							List<IBCEventFilter> filters = getFiltersFromBeaconOptionsArgument(optionsArg);
 
-							filters.add(BCEventFilter.filterApplySmoothedAccuracyOverTimeInterval(5000));
 							filters.add(BCEventFilter.filterByMinTimeIntervalBetweenTriggers(getMinimumTriggerIntervalInMillisecondsFromBeaconOptionsArgument(optionsArg)));
 							filters.add(BCEventFilter.filterByClosestBeaconChanged());
 
