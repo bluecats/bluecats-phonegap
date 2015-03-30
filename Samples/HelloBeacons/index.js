@@ -151,3 +151,5 @@ var app = {
         }
     }
 };
+
+app.initialize();
