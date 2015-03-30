@@ -7,11 +7,10 @@
 //
 
 #import "BCBeacon.h"
-#import "BCJSONModel.h"
 
 @class BCSite, BCMapPoint;
 
-@interface BCMicroLocation : BCJSONModel <NSCopying>
+@interface BCMicroLocation : NSObject <NSCopying>
 
 @property (nonatomic, copy) NSArray *sites;
 @property (nonatomic, copy) NSDictionary *beaconsForSiteID;
