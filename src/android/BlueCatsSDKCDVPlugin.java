@@ -561,6 +561,8 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 			return BlueCatsSDK.BC_OPTION_CACHE_ALL_BEACONS_FOR_APP;
 		} else if (sdkOption.equals("discoverBeaconsNearby")) {
 			return BlueCatsSDK.BC_OPTION_DISCOVER_BEACONS_NEARBY;
+		} else if (sdkOption.equals("useRSSISmoothing")) {
+			return BlueCatsSDK.BC_OPTION_USE_RSSI_SMOOTHING;
 		} else if (sdkOption.equals("cacheRefreshTimeIntervalInSeconds")) {
 			return BlueCatsSDK.BC_OPTION_CACHE_REFRESH_TIME_INTERVAL_IN_MILLISECONDS;
 		}
