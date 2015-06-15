@@ -83,7 +83,7 @@
 	    <config-file target="AndroidManifest.xml" parent="/manifest/application">
 	    	<activity android:name="com.blueCats.BlueCatsSDKCDVPlugin.BlueCatsSDKCDVPluginLocalNotificationReveiverActivity" android:launchMode="singleInstance" />
 
-	    	<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+	    	<meta-data android:name="com.google.android.gms.version" android:value="7571000" />
 
 	        <service android:name="com.bluecats.sdk.BlueCatsSDKService" />
 
