@@ -8,7 +8,7 @@ This sample creates the default 'Hello World' Phonegap project and extends with 
 
     phonegap create HelloBeacons
     cd HelloBeacons
-    phonegap plugin add https://bluecats.unfuddle.com/git/bluecats_bcsdkcdp/
+    phonegap plugin add https://github.com/bluecats/bluecats-phonegap.git
     cp plugins/com.bluecats.beacons/Samples/HelloBeacons/index.js www/js/index.js
 
 Edit www/js/index.js and update the line:
