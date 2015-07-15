@@ -16,6 +16,7 @@ Phonegap
 
 - iOS
 - Android
+if you have any trouble to get SDK starting purring, please refer to our [Wiki](https://github.com/bluecats/bluecats-android-sdk/wiki) or [FAQ](https://github.com/bluecats/bluecats-android-sdk/wiki/SDK-does-not-start-to-purring)
 
 ## Methods
 
