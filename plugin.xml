@@ -83,7 +83,7 @@
 	    <config-file target="AndroidManifest.xml" parent="/manifest/application">
 	    	<activity android:name="com.blueCats.BlueCatsSDKCDVPlugin.BlueCatsSDKCDVPluginLocalNotificationReveiverActivity" android:launchMode="singleInstance" />
 
-	    	<meta-data android:name="com.google.android.gms.version" android:value="7571000" />
+	    	<meta-data android:name="com.google.android.gms.version" android:value="7895000" />
 
 	        <service android:name="com.bluecats.sdk.BlueCatsSDKService" />
 
@@ -101,11 +101,19 @@
 	        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     		<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    		<uses-permission android:name="android.permission.WAKE_LOCK" />
 	    </config-file>
 
 	    <source-file src="src/android/BlueCatsSDKCDVPlugin.java" target-dir="src/com/blueCats/BlueCatsSDKCDVPlugin" />
 	    <source-file src="src/android/BlueCatsSDKCDVPluginLocalNotificationReveiverActivity.java" target-dir="src/com/blueCats/BlueCatsSDKCDVPlugin" />
 
+	    <source-file src="src/android/libs/arm64-v8a/libbluecats_sdk.so" target-dir="libs/arm64-v8a" /> 
+	    <source-file src="src/android/libs/armeabi/libbluecats_sdk.so" target-dir="libs/armeabi" /> 
+	    <source-file src="src/android/libs/armeabi-v7a/libbluecats_sdk.so" target-dir="libs/armeabi-v7a" /> 
+	    <source-file src="src/android/libs/mips/libbluecats_sdk.so" target-dir="libs/mips" /> 
+	    <source-file src="src/android/libs/mips64/libbluecats_sdk.so" target-dir="libs/mips64" /> 
+	    <source-file src="src/android/libs/x86/libbluecats_sdk.so" target-dir="libs/x86" /> 
+	    <source-file src="src/android/libs/x86_64/libbluecats_sdk.so" target-dir="libs/x86_64" /> 
 	    <source-file src="src/android/libs/bluecats_sdk.jar" target-dir="libs" /> 
 	    <source-file src="src/android/libs/google-play-services.jar" target-dir="libs" />
 	    <source-file src="src/android/libs/gson-2.2.4.jar" target-dir="libs" />
