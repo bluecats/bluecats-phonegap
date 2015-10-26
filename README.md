@@ -12,7 +12,7 @@ Phonegap
 
     phonegap plugin add https://github.com/bluecats/bluecats-phonegap.git
 
-## Suported Platforms
+## Supported Platforms
 
 - iOS
 - Android
@@ -75,7 +75,7 @@ iOS 8 requires a description for the reason for accessing the user's location in
 
 ### Cordova
 
-If using Cordova replace the `phonegap` in the above comands with `cordova`
+If using Cordova replace the `phonegap` in the above commands with `cordova`
 
 ## com.bluecats.beacons.startPurringWithAppToken
 
@@ -139,7 +139,7 @@ var beaconWatchOptions = {
       minimumProximity:'BC_PROXIMITY_IMMEDIATE', //String. Closest proximity to include. Default BC_PROXIMITY_IMMEDIATE
       maximumProximity:'BC_PROXIMITY_NEAR', //String. Furthest proximity to include. Default BC_PROXIMITY_UNKNOWN
       minimumAccuracy:0, //Number. Minimum distance in metres (Default 0)
-        maximumAccuracy:0.5 //Number. Maximum distnace in metres (Default unrestricted)
+        maximumAccuracy:0.5 //Number. Maximum distance in metres (Default unrestricted)
         sitesNamed:['Site1','Another Site'],//Array of string. Only include beacons in specified sites
         categoriesNamed:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
 
@@ -186,7 +186,7 @@ var beaconWatchOptions = {
       minimumProximity:'BC_PROXIMITY_IMMEDIATE', //String. Closest proximity to include. Default BC_PROXIMITY_IMMEDIATE
       maximumProximity:'BC_PROXIMITY_NEAR', //String. Furthest proximity to include. Default BC_PROXIMITY_UNKNOWN
       minimumAccuracy:0, //Number. Minimum distance in metres (Default 0)
-        maximumAccuracy:0.5 //Number. Maximum distnace in metres (Default unrestricted)
+        maximumAccuracy:0.5 //Number. Maximum distance in metres (Default unrestricted)
         sitesNamed:['Site1','Another Site'],//Array of string. Only include beacons in specified sites
         categoriesNamed:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
     }
@@ -231,7 +231,7 @@ var beaconWatchOptions = {
       minimumProximity:'BC_PROXIMITY_IMMEDIATE', //String. Closest proximity to include. Default BC_PROXIMITY_IMMEDIATE
       maximumProximity:'BC_PROXIMITY_NEAR', //String. Furthest proximity to include. Default BC_PROXIMITY_UNKNOWN
       minimumAccuracy:0, //Number. Minimum distance in metres (Default 0)
-        maximumAccuracy:0.5 //Number. Maximum distnace in metres (Default unrestricted)
+        maximumAccuracy:0.5 //Number. Maximum distance in metres (Default unrestricted)
         sitesNamed:['Site1','Another Site'],//Array of string. Only include beacons in specified sites
         categoriesNamed:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
     }
@@ -277,7 +277,7 @@ var beaconWatchOptions = {
       minimumProximity:'BC_PROXIMITY_IMMEDIATE', //String. Closest proximity to include. Default BC_PROXIMITY_IMMEDIATE
       maximumProximity:'BC_PROXIMITY_NEAR', //String. Furthest proximity to include. Default BC_PROXIMITY_UNKNOWN
       minimumAccuracy:0, //Number. Minimum distance in metres (Default 0)
-        maximumAccuracy:0.5 //Number. Maximum distnace in metres (Default unrestricted)
+        maximumAccuracy:0.5 //Number. Maximum distance in metres (Default unrestricted)
         sitesNamed:['Site1','Another Site'],//Array of string. Only include beacons in specified sites
         categoriesNamed:['Entrance','Another Category'],//Array of string. Only include beacons in specified categories
     }
@@ -478,7 +478,7 @@ Bluecats unique identifier for this beacon
 BlueCats unique identifier for the team this beacon belongs to
 
 - __proximity__: string
-Simplified classification of the distance to the beacon. Availalble values are: BC_PROXIMITY_IMMEDIATE (~< 0.5m) BC_PROXIMITY_NEAR (~< 3m) BC_PROXIMITY_FAR (~>3m) BC_PROXIMITY_UNKNOWN (unable to determine distance). These distances are approximations only and will vary by device and beacon configuration.
+Simplified classification of the distance to the beacon. Available values are: BC_PROXIMITY_IMMEDIATE (~< 0.5m) BC_PROXIMITY_NEAR (~< 3m) BC_PROXIMITY_FAR (~>3m) BC_PROXIMITY_UNKNOWN (unable to determine distance). These distances are approximations only and will vary by device and beacon configuration.
 
 - __bluetoothAddress__: string
 Unique identifier for the bluetooth device
@@ -493,7 +493,7 @@ Updates made to a beacon that need to be flashed to the physical beacon incremen
 The name of the site the beacon belongs to
 
 - __accuracy__: double
-Approximite distance from the beacon in metres. 
+Approximate distance from the beacon in metres. 
 
 - __rssi__: integer
 Strength of the signal from the beacon. Can be in the range 0 to -100. The closer to zero the strong the signal
@@ -540,4 +540,3 @@ BlueCats unique identifier for the category
 
 - __name__: string
 Friendly name for the category
-
