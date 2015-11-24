@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
 	id="com.bluecats.beacons"
-	version="1.0.2">
+	version="1.14.0-preview">
 
 	<!-- This plugin requires Cordova version 3.1.0 or newer. -->
 	<engines>
@@ -9,9 +9,9 @@
 	</engines>
 
 	<name>BlueCats BLE API</name>
-
+	<!--
 	<dependency id="org.apache.cordova.android-support-library" url="https://github.com/savs/android-support-library" /> 
-
+	-->
 	<js-module src="blueCatsSDKCDVPlugin.js" name="BlueCatsSDKCDVPlugin">
 		<clobbers target="com.bluecats.beacons" />
 	</js-module>
@@ -82,9 +82,9 @@
 
 	    <config-file target="AndroidManifest.xml" parent="/manifest/application">
 	    	<activity android:name="com.blueCats.BlueCatsSDKCDVPlugin.BlueCatsSDKCDVPluginLocalNotificationReveiverActivity" android:launchMode="singleInstance" />
-
-	    	<meta-data android:name="com.google.android.gms.version" android:value="7895000" />
-
+<!--
+	    	<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+-->
 	        <service android:name="com.bluecats.sdk.BlueCatsSDKService" />
 
 	        <receiver android:name="com.bluecats.sdk.BlueCatsSDKServiceReceiver" >
@@ -103,7 +103,11 @@
     		<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     		<uses-permission android:name="android.permission.WAKE_LOCK" />
 	    </config-file>
-
+		<framework src="push.gradle" custom="true" type="gradleReference" />
+<!--		
+        <framework src="com.android.support:support-v13:23+" />
+		<framework src="com.google.android.gms:play-services:+" />
+-->
 	    <source-file src="src/android/BlueCatsSDKCDVPlugin.java" target-dir="src/com/blueCats/BlueCatsSDKCDVPlugin" />
 	    <source-file src="src/android/BlueCatsSDKCDVPluginLocalNotificationReveiverActivity.java" target-dir="src/com/blueCats/BlueCatsSDKCDVPlugin" />
 
@@ -115,7 +119,7 @@
 	    <source-file src="src/android/libs/x86/libbluecats_sdk.so" target-dir="libs/x86" /> 
 	    <source-file src="src/android/libs/x86_64/libbluecats_sdk.so" target-dir="libs/x86_64" /> 
 	    <source-file src="src/android/libs/bluecats_sdk.jar" target-dir="libs" /> 
-	    <source-file src="src/android/libs/google-play-services.jar" target-dir="libs" />
+
 	    <source-file src="src/android/libs/gson-2.2.4.jar" target-dir="libs" />
     </platform>
     

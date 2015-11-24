@@ -551,8 +551,8 @@ public class BlueCatsSDKCDVPlugin extends CordovaPlugin {
 			return BlueCatsSDK.BC_OPTION_MONITOR_BLUE_CATS_REGION_ON_STARTUP;
 		} else if (sdkOption.equals("monitorAllAvailableRegionsOnStartup")) {
 			return BlueCatsSDK.BC_OPTION_MONITOR_ALL_AVAILABLE_REGIONS_ON_STARTUP;
-		} else if (sdkOption.equals("useEnergySaverScanStrategy")) {
-			return BlueCatsSDK.BC_OPTION_USE_ENERGY_SAVER_SCAN_STRATEGY;
+		//} else if (sdkOption.equals("useEnergySaverScanStrategy")) {
+		//	return BlueCatsSDK.BC_OPTION_USE_ENERGY_SAVER_SCAN_STRATEGY;
 		} else if (sdkOption.equals("crowdSourceBeaconUpdates")) {
 			return BlueCatsSDK.BC_OPTION_CROWD_SOURCE_BEACON_UPDATES;
 		} else if (sdkOption.equals("useLocalStorage")) {
