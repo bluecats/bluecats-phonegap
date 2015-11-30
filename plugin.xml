@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
 	id="com.bluecats.beacons"
-	version="1.14.0-preview">
+	version="1.0.5">
 
 	<!-- This plugin requires Cordova version 3.1.0 or newer. -->
 	<engines>
 		<engine name="cordova" version=">=3.1.0" />
 	</engines>
 
-	<name>BlueCats BLE API</name>
+	<name>phonegap-plugin-bluecats</name>
 	<!--
 	<dependency id="org.apache.cordova.android-support-library" url="https://github.com/savs/android-support-library" /> 
 	-->
@@ -66,7 +66,8 @@
 		<header-file src="src/ios/BlueCatsSDK/BCSite.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCTriggeredEvent.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCTrigger.h" />
-
+		<header-file src="src/ios/BlueCatsSDK/BCDefinitions.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCJSONModel+BCCustomValueDataSource.h" />
 		<source-file src="src/ios/BlueCatsSDK/libBlueCatsSDK.a" framework="true" />
 
 	</platform>

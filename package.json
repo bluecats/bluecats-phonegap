@@ -1,6 +1,6 @@
 {
-    "version": "1.0.2",
-    "name": "com.blueCats.BlueCatsSDKCDVPlugin",
+    "version": "1.0.5",
+    "name": "com.bluecats.beacons",
     "cordova_name": "BlueCats Bluetooth Low Energy (BLE) SDK Plugin",
     "engines": [
         {
