@@ -105,8 +105,8 @@
     		<uses-permission android:name="android.permission.WAKE_LOCK" />
 	    </config-file>
 		<framework src="push.gradle" custom="true" type="gradleReference" />
-<!--		
         <framework src="com.android.support:support-v13:23+" />
+<!--
 		<framework src="com.google.android.gms:play-services:+" />
 -->
 	    <source-file src="src/android/BlueCatsSDKCDVPlugin.java" target-dir="src/com/blueCats/BlueCatsSDKCDVPlugin" />
