@@ -54,5 +54,6 @@ public class BlueCatsSDKCDVPluginLocalNotificationReveiverActivity extends Activ
         } catch (Exception e) {
             Log.e(TAG, e.toString());
         }
+		finish();
     }
 }
