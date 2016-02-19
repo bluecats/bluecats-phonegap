@@ -68,6 +68,15 @@
 		<header-file src="src/ios/BlueCatsSDK/BCTrigger.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCDefinitions.h" />
 		<header-file src="src/ios/BlueCatsSDK/BCJSONModel+BCCustomValueDataSource.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCBatteryStatus.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCBeaconLoudness.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCLasso.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCLassoManager.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCPlatformType.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCSiteAccessType.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCTargetSpeed.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCZone.h" />
+		<header-file src="src/ios/BlueCatsSDK/BCZoneMonitor.h" />
 		<source-file src="src/ios/BlueCatsSDK/libBlueCatsSDK.a" framework="true" />
 
 	</platform>
