@@ -1,3 +1,11 @@
+# Deprecation Notice
+This Cordova / Phonegap plugin for the BlueCats Mobile SDK is no longer actively maintained by the BlueCats team. We recommend the use of the following native mobile SDKs:
+
+- iOS (Objective-C or Swift): https://github.com/bluecats/bluecats-ios-sdk
+- Android: https://github.com/bluecats/bluecats-android-sdk
+
+If you have further questions please contact BlueCats Support: support@bluecats.com
+
 # com.bluecats.beacons
 
 This plugin provides a Phonegap or Cordova app access to Bluetooth Low Energy iBeacons and Beacons via the BlueCats (www.bluecats.com) BLE SDKs for iOS and Android.
